@@ -138,10 +138,6 @@ class PDFViewer(QtWidgets.QFrame):
         self.pdfView.setSizePolicy(size_policy)
         self.verticalLayout.addWidget(self.pdfView)
 
-
-
-
-
         # Connect Signals and Slots
         self.actionZoom_In.triggered.connect(self.zoom_in_triggered)
         self.actionZoom_Out.triggered.connect(self.zoom_out_triggered)
@@ -204,6 +200,7 @@ class PDFViewer(QtWidgets.QFrame):
             self.m_pageSelector.setMaximum(self.m_document.pageCount())
             self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
         else:
+            self.m_document.close()
             logger.warn(f"{path} is not a valid  file")
 
     @QtCore.Slot()
