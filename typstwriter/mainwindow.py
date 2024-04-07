@@ -80,6 +80,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.FSdock.setAllowedAreas(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.FSdock)
 
+        # CompilerOptions
+        self.CompilerOptions = compiler_tools.CompilerOptions()
+        self.CompilerOptionsdock = QtWidgets.QDockWidget("Compiler Options", self)
+        self.CompilerOptionsdock.setWidget(self.CompilerOptions)
+        self.CompilerOptionsdock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable)
+        self.CompilerOptionsdock.setAllowedAreas(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOptionsdock)
+
         # Compiler Output
         self.CompilerOutput = compiler_tools.CompilerOutput()
         self.CompilerOutputdock = QtWidgets.QDockWidget("Compiler Output", self)
