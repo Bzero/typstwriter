@@ -95,11 +95,11 @@ class Actions(QtCore.QObject):
         self.show_fs_explorer.setCheckable(True)
 
         self.show_compiler_options = QtWidgets.QAction(self)
-        self.show_compiler_options.setText("Show FS Explorer")
+        self.show_compiler_options.setText("Show Compiler Options")
         self.show_compiler_options.setCheckable(True)
 
         self.show_compiler_output = QtWidgets.QAction(self)
-        self.show_compiler_output.setText("Show FS Explorer")
+        self.show_compiler_output.setText("Show Compiler Output")
         self.show_compiler_output.setCheckable(True)
 
         self.open_config = QtWidgets.QAction(self)
