@@ -2,6 +2,8 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
+import os
+
 import logging
 import configuration
 import globalstate
@@ -11,10 +13,12 @@ config = configuration.Config
 state = globalstate.State
 
 
-class CompilerOptions(QtWidgets.QFrame):
+class CompilerOptions(QtWidgets.QWidget):
+    """Displays the compiler options."""
 
     def __init__(self):
-        QtWidgets.QFrame.__init__(self)
+        """Populate the widget."""
+        QtWidgets.QWidget.__init__(self)
 
         self.FrameLayout = QtWidgets.QVBoxLayout(self)
         self.FrameLayout.setContentsMargins(4, 4, 4, 4)
@@ -33,26 +37,58 @@ class CompilerOptions(QtWidgets.QFrame):
         self.Layout.setSpacing(2)
         self.Layout.setAlignment(QtGui.Qt.AlignTop)
 
-        # Row 1
+        # Mode
         self.label_mode = QtWidgets.QLabel("Mode")
         self.combo_box_mode = QtWidgets.QComboBox()
         self.combo_box_mode.addItem("On Demand")  # For now there is only one compiler mode.
 
-        # Row 2
+        # Main file
         self.label_main = QtWidgets.QLabel("Main file")
-        self.line_edit_main = QtWidgets.QLineEdit()
+        self.line_edit_main = QtWidgets.QLineEdit(self)
+        self.line_edit_main.setText("")
+        self.line_edit_main.editingFinished.connect(self.main_path_edited)
+        self.folderAction = QtWidgets.QAction(QtGui.QIcon("icons/folder.svg"), "open")
+        self.folderAction.triggered.connect(self.open_file_dialog)
+        self.line_edit_main.addAction(self.folderAction, QtWidgets.QLineEdit.LeadingPosition)
 
+        # Insert everything into layout
         self.Layout.addWidget(self.label_mode, 0, 0)
         self.Layout.addWidget(self.combo_box_mode, 0, 1)
         self.Layout.addWidget(self.label_main, 1, 0)
         self.Layout.addWidget(self.line_edit_main, 1, 1)
 
-class CompilerOutput(QtWidgets.QFrame):
+    @QtCore.Slot()
+    def main_path_edited(self):
+        """Handle LineEdits editingFinished signal. Change main file path if it is valid and resets otherwise."""
+        path = os.path.normpath(os.path.expanduser(self.line_edit_main.text()))
+        if os.path.isfile(path):
+            state.main_file.Value = path
+        else:
+            self.line_edit_main.setText(state.main_file.Value)
+            logger.info(f"Attempted to set main file but '{path}' is not a valid path.")
+
+    @QtCore.Slot()
+    def open_file_dialog(self):
+        """Open a dialog to select the main file."""
+        filters = "Typst Files (*.typ);;Any File (*)"
+        path, cd = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", state.working_directory.Value, filters)
+
+        if os.path.isfile(path):
+            self.line_edit_main.setText(path)
+            state.main_file.Value = path
+
+    @QtCore.Slot(str)
+    def main_changed(self, path):
+        """Update display of main file."""
+        self.line_edit_main.setText(path)
+
+
+class CompilerOutput(QtWidgets.QWidget):
     """Displays the compiler output."""
 
     def __init__(self):
         """Populate the widget up."""
-        QtWidgets.QFrame.__init__(self)
+        QtWidgets.QWidget.__init__(self)
 
         self.OutputDisplay = QtWidgets.QTextEdit()
         self.OutputDisplay.setReadOnly(True)

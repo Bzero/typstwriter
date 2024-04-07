@@ -36,6 +36,7 @@ class FSContextMenu(QtWidgets.QMenu):
         self.action_delete = QtWidgets.QAction("Delete", triggered=self.handle_delete)
         self.setRoot = QtWidgets.QAction("Set as Working Directory", triggered=self.handle_set_root)
         self.action_copy_path = QtWidgets.QAction("Copy path", triggered=self.handle_copy_path)
+        self.action_main_file = QtWidgets.QAction("Set as main file", triggered=self.handle_set_as_main_file)
 
     def handle_open(self):
         """Trigger opening a file."""
@@ -65,6 +66,10 @@ class FSContextMenu(QtWidgets.QMenu):
         """Trigger copying path to the clipboard."""
         QtGui.QGuiApplication.clipboard().setText(self.context_path)
 
+    def handle_set_as_main_file(self):
+        """Trigger setting the current file as main file."""
+        state.main_file.Value = self.context_path
+
 
 class NoItemContextMenu(FSContextMenu):
     """Context menu when not clicking on any item."""
@@ -88,6 +93,7 @@ class FileContextMenu(FSContextMenu):
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
         self.addAction(self.action_copy_path)
+        self.addAction(self.action_main_file)
 
 
 class FolderContextMenu(FSContextMenu):

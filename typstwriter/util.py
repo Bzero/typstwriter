@@ -129,3 +129,10 @@ def open_with_external_program(path):
             logger.error("Unsupported system :" + str(sys.platform))
     else:
         logger.warning("Attempted to open file with external program {path} is not a valid path.")
+
+
+def pdf_path(typst_path):
+    """Convert a input path to a pdf output path."""
+    (trunk, ext) = os.path.splitext(typst_path)
+    pdf_path = trunk + ".pdf"
+    return pdf_path

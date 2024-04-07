@@ -125,12 +125,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.open_config.triggered.connect(self.open_config)
 
         self.FSExplorer.open_file.connect(self.editor.open_file)
-        self.editor.active_file_changed.connect(self.set_main_file)
         self.editor.text_changed.connect(self.CompilerConnector.source_changed)
         self.CompilerConnector.document_changed.connect(self.PDFWidget.reload)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.set_fin(s))
-        state.main_file.Signal.connect(lambda s: self.CompilerConnector.set_fout(s.replace(".typ", ".pdf")))
-        state.main_file.Signal.connect(lambda s: self.PDFWidget.open(s.replace(".typ", ".pdf")))
+        state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
+        state.main_file.Signal.connect(lambda s: self.CompilerConnector.set_fout(util.pdf_path(s)))
+        state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
+
 
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
@@ -196,6 +197,3 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             event.ignore()
 
-    def set_main_file(self, path):
-        """Set the main file in global state."""
-        state.main_file.Value = path
