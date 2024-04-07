@@ -68,14 +68,15 @@ class Editor(QtWidgets.QFrame):
             icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
             self.TabWidget.addTab(editorpage, icon, name)
             self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-            self.recentFiles.append(path)
             self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("black"))
 
             editorpage.edit.textChanged.connect(self.childtext_changed)
             editorpage.savestatechanged.connect(self.childsavedstate_changed)
             editorpage.pathchanged.connect(self.childpath_changed)
 
-            self.recent_files_changed.emit(self.recentFiles.list())
+            if editorpage.isloaded is True:
+                self.recentFiles.append(path)
+                self.recent_files_changed.emit(self.recentFiles.list())
         else:
             index = self.openfiles_list().index(path)
             self.TabWidget.setCurrentIndex(index)
@@ -223,6 +224,7 @@ class EditorPage(QtWidgets.QFrame):
 
         self.path = path
         self.issaved = True
+        self.isloaded = False
         if path:
             self.load(path)
 
@@ -236,16 +238,19 @@ class EditorPage(QtWidgets.QFrame):
             self.issaved = True
             self.path = path
             self.pathchanged.emit(self.path)
+            self.isloaded = True
 
         except UnicodeError:
             msg = f"'{path}' is not a text file."
             logger.warning(msg)
             self.show_error(msg)
+            self.isloaded = False
 
         except OSError:
             msg = f"'{path}' is not a valid file."
             logger.warning(msg)
             self.show_error(msg)
+            self.isloaded = False
 
     def save(self):
         """Save file."""
