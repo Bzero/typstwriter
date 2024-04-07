@@ -83,7 +83,7 @@ class Editor(QtWidgets.QFrame):
 
     def open_file_dialog(self):
         """Open a dialog to open an existing file."""
-        filters = "Typst Files (*.ty);;Any File (*)"
+        filters = "Typst Files (*.typ);;Any File (*)"
         path, cd = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", QtCore.QDir.homePath(), filters)
         if path:
             self.open_file(path)
