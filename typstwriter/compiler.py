@@ -19,7 +19,6 @@ text_compiled_erroniously = "compiled with errors"
 text_compiled_successfully = "compiled successfully"
 
 
-#TODO: use abc
 class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     """
     Abstract Class to build the interface between typstwriter and the typst backend using the filesystem for input and output.
@@ -110,7 +109,7 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
 class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
     """CompilerConnector using the filesystem and compiling on demand."""
 
-    cmode = cmode.on_demand
+    compiler_mode = cmode.on_demand
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
@@ -187,9 +186,9 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
 
 
 class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
-    # """CompilerConnector using the filesystem and compiling live."""
+    """CompilerConnector using the filesystem and compiling live."""
 
-    cmode = cmode.live
+    compiler_mode = cmode.live
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
@@ -265,3 +264,126 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             logger.debug(f"Compiled {self.fin} successfully in {(self.end_time - self.start_time)*1000:.2f}ms.")
             self.document_changed.emit()
             self.compilation_finished.emit()
+
+
+#TODO: This implementation is not optimal as it has a lot of repetition with CompilerConnector.
+# Attempts to make it more consise by overriding __getattr__ were not successful because of the signals
+class WrappedCompilerConnector(QtCore.QObject):
+    """
+    A CompilerConnector Wrapper.
+
+    This class provides the same interface as a CompilerConnector but makes the compiler exchangable using set_compiler.
+    This allows to connect signals and slots to this class and to swap out the actual CompilerConnector instance
+    (e.g. to switch modes) without the need to reconnect all signals and slots to the new instance.
+    """
+
+    compilation_started = QtCore.Signal()
+    compilation_finished = QtCore.Signal()
+    document_changed = QtCore.Signal()
+    new_stderr = QtCore.Signal(str)
+    new_stdout = QtCore.Signal(str)
+
+    def __init__(self, compiler_mode, fin=None, fout=None):
+        """Init."""
+        super().__init__()
+
+        self.set_compiler(compiler_mode, fin, fout)
+
+    def set_compiler(self, compiler_mode, fin=None, fout=None):
+        """Create new compiler."""
+        match compiler_mode:
+            case cmode.on_demand:
+                self.CompilerConnector = CompilerConnector_FS_onDemand(fin, fout)
+                self.connect_signals()
+                logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
+            case cmode.live:
+                self.CompilerConnector = CompilerConnector_FS_live(fin, fout)
+                self.connect_signals()
+                logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
+            case _:
+                #Use CompilerConnector_FS as a dummy which just ignores all start or compile commands
+                self.CompilerConnector = CompilerConnector_FS(fin, fout)
+                self.connect_signals()
+                logging.warn(f"Attempted to create a new compiler but {compiler_mode} is not a valid compiler mode.")
+
+    def switch_compiler(self, compiler_mode):
+        """Switch to a new compiler while keeping fin and fout."""
+        self.CompilerConnector.stop()
+        self.disconnect_signals()
+        fin = self.CompilerConnector.fin
+        fout = self.CompilerConnector.fout
+        self.set_compiler(compiler_mode, fin, fout)
+
+    def restart_compiler(self):
+        """Restart the compiler."""
+        compiler_mode = self.CompilerConnector.compiler_mode
+        self.switch_compiler(compiler_mode)
+
+    def connect_signals(self):
+        """Connect wrapper signals to compiler signals."""
+        self.CompilerConnector.compilation_started.connect(self.relay_compilation_started)
+        self.CompilerConnector.compilation_finished.connect(self.relay_compilation_finished)
+        self.CompilerConnector.document_changed.connect(self.relay_document_changed)
+        self.CompilerConnector.new_stderr.connect(self.relay_new_stderr)
+        self.CompilerConnector.new_stdout.connect(self.relay_new_stdout)
+
+    def disconnect_signals(self):
+        """Disconnect wrapper signals from compiler signals."""
+        self.CompilerConnector.compilation_started.disconnect(self.relay_compilation_started)
+        self.CompilerConnector.compilation_finished.disconnect(self.relay_compilation_finished)
+        self.CompilerConnector.document_changed.disconnect(self.relay_document_changed)
+        self.CompilerConnector.new_stderr.disconnect(self.relay_new_stderr)
+        self.CompilerConnector.new_stdout.disconnect(self.relay_new_stdout)
+
+    @QtCore.Slot(str)
+    def set_fin(self, fin):
+        """Relay set_fin to compiler."""
+        self.CompilerConnector.set_fin(fin)
+
+    @QtCore.Slot(str)
+    def set_fout(self, fout):
+        """Relay set_fout to compiler."""
+        self.CompilerConnector.set_fout(fout)
+
+    @QtCore.Slot()
+    def compile(self):
+        """Relay compile to compiler."""
+        self.CompilerConnector.compile()
+
+    @QtCore.Slot()
+    def start(self):
+        """Relay start to compiler."""
+        self.CompilerConnector.start()
+
+    @QtCore.Slot()
+    def stop(self):
+        """Relay stop to compiler."""
+        self.CompilerConnector.stop()
+
+    @QtCore.Slot()
+    def source_changed(self):
+        """Relay source_changed to compiler."""
+        self.CompilerConnector.source_changed()
+
+    def relay_compilation_started(self):
+        """Relay compilation_started to compiler."""
+        self.compilation_started.emit()
+
+    def relay_compilation_finished(self):
+        """Relay compilation_finished to compiler."""
+        self.compilation_finished.emit()
+
+    def relay_document_changed(self):
+        """Relay document_changed to compiler."""
+        self.document_changed.emit()
+
+    def relay_new_stderr(self, stderr):
+        """Relay new_stderr to compiler."""
+        self.new_stderr.emit(stderr)
+
+    def relay_new_stdout(self, stderr):
+        """Relay new_stdout to compiler."""
+        self.new_stdout.emit(stderr)
+
+    # def __getattr__(self, name):
+    #     return getattr(self.CompilerConnector, name)
