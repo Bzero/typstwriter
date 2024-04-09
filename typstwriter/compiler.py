@@ -14,7 +14,6 @@ state = globalstate.State
 
 cmode = enum.Enum("compilation_mode", ["on_demand", "live"])
 
-
 text_compiling = "compiling ..."
 text_compiled_erroniously = "compiled with errors"
 text_compiled_successfully = "compiled successfully"
@@ -30,12 +29,17 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     set_fout(fout): Set output file path
 
     Slots:
-    compile(): Instructs the CompilerConnector to (re)compile. Live variants may ignore these signal.
+    start(): Instructs the CompilerConnector to start its process. On demand variants may ignore this signal.
+    stop(): Instructs the CompilerConnector to stop its process.
+    compile(): Instructs the CompilerConnector to (re)compile. Live variants may ignore this signal.
     input_changed(): Notifies the CompilerConnector that the input files have changed.
 
     Signals:
-    compilation_finished(exit_code): Emitted when compilation finishes(regardsless of success)
-    new_output_available(): Emitted when the output document has changed
+    compilation_started(): Emitted when the compilation starts
+    compilation_finished(): Emitted when compilation finishes(regardsless of success).
+    document_changed(): Emitted when the output document has changed.
+    new_stderr(str): Emitted when new stderr is available.
+    new_stdout(str): Emitted when new stdout is available.
     """
 
     compilation_started = QtCore.Signal()
@@ -44,21 +48,57 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     new_stderr = QtCore.Signal(str)
     new_stdout = QtCore.Signal(str)
 
-    def __init__(self):
+    def __init__(self, fin=None, fout=None):
         """Init."""
         super().__init__()
 
+        self.compiler = config.get("Compiler", "Name")
+
+        self.fin = fin
+        self.fout = fout
+
+        self.current_stdout = None
+        self.current_stderr = None
+
+        self.process = None
+
+    @QtCore.Slot(str)
     def set_fin(self, fin):
         """Set input file path."""
-        pass
+        if isinstance(fin, str):
+            self.fin = fin
 
+    @QtCore.Slot(str)
     def set_fout(self, fout):
         """Set output file path."""
-        pass
+        if isinstance(fout, str):
+            self.fout = fout
+
+    def handle_ready_stdout(self):
+        """Store and Emit stdout as plain text signal."""
+        stdout = bytes(self.process.readAllStandardOutput()).decode("utf8")
+        self.current_stdout += stdout
+        self.new_stdout.emit(stdout)
+
+    def handle_ready_stderr(self):
+        """Store and Emit stderr as plain text signal."""
+        stderr = bytes(self.process.readAllStandardError()).decode("utf8")
+        self.current_stderr += stderr
+        self.new_stderr.emit(stderr)
 
     @QtCore.Slot()
     def compile(self):
         """Compile."""
+        pass
+
+    @QtCore.Slot()
+    def start(self):
+        """Start."""
+        pass
+
+    @QtCore.Slot()
+    def stop(self):
+        """Stop."""
         pass
 
     @QtCore.Slot()
@@ -74,19 +114,10 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
-        super().__init__()
+        super().__init__(fin, fout)
 
-        self.compiler = config.get("Compiler", "Name")
         self.subcommand = "compile"
-        self.fin = fin
-        self.fout = fout
-
-        self.current_stdout = None
-        self.current_stderr = None
-
-        self.process = None
         self.recompile_scheduled = False
-
         self.compilation_finished.connect(self.check_recompilation)
 
     @QtCore.Slot()
@@ -109,6 +140,25 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.process.start()
         else:
             self.recompile_scheduled = True
+
+    @QtCore.Slot()
+    def stop(self):
+        """Stop the compiler."""
+        if self.process is not None:
+            # Disconnect streams
+            self.process.readyReadStandardOutput.disconnect(self.handle_ready_stdout)
+            self.process.readyReadStandardError.disconnect(self.handle_ready_stderr)
+
+            # Attempt to terminate the process.
+            self.process.terminate()
+
+            #TODO: kill process if it did not terminate
+
+            self.recompile_scheduled = False
+            self.compilation_finished(-1)
+        else:
+            logging.warning("Attempted to stop the compiler but it is not running.")
+
 
     @QtCore.Slot(int)
     def compile_finished(self, exitcode):
@@ -135,29 +185,6 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.recompile_scheduled = False
             self.compile()
 
-    def handle_ready_stdout(self):
-        """Store and Emit stdout as plain text signal."""
-        stdout = bytes(self.process.readAllStandardOutput()).decode("utf8")
-        self.current_stdout += stdout
-        self.new_stdout.emit(stdout)
-
-    def handle_ready_stderr(self):
-        """Store and Emit stderr as plain text signal."""
-        stderr = bytes(self.process.readAllStandardError()).decode("utf8")
-        self.current_stderr += stderr
-        self.new_stderr.emit(stderr)
-
-    @QtCore.Slot(str)
-    def set_fin(self, fin):
-        """Set input file path."""
-        if isinstance(fin, str):
-            self.fin = fin
-
-    def set_fout(self, fout):
-        """Set output file path."""
-        if isinstance(fout, str):
-            self.fout = fout
-
 
 class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
     # """CompilerConnector using the filesystem and compiling live."""
@@ -166,18 +193,10 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
-        super().__init__()
+        super().__init__(fin, fout)
 
-        self.compiler = config.get("Compiler", "Name")
         self.subcommand = "watch"
-        self.fin = fin
-        self.fout = fout
-
-        self.current_stdout = None
-        self.current_stderr = None
-
-        self.process = None
-        self.recompile_scheduled = False
+        self.new_stderr.connect(self.process_stderr)
 
     def start(self):
         """Start the compiler."""
@@ -192,6 +211,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             self.current_stdout = ""
             self.current_stderr = ""
 
+            logger.debug("Compilation started.")
             self.compilation_started.emit()
             self.start_time = time.time()
             self.process.start()
@@ -200,19 +220,22 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
     def stop(self):
         """Stop the compiler."""
-        # Disconnect streams
-        self.process.readyReadStandardOutput.disconnect(self.handle_ready_stdout)
-        self.process.readyReadStandardError.disconnect(self.handle_ready_stderr)
+        if self.process is not None:
+            # Disconnect streams
+            self.process.readyReadStandardOutput.disconnect(self.handle_ready_stdout)
+            self.process.readyReadStandardError.disconnect(self.handle_ready_stderr)
 
-        # Attempt to terminate the process.
-        self.process.terminate()
+            # Attempt to terminate the process.
+            self.process.terminate()
 
-        #TODO: kill process if it did not terminate
+            #TODO: kill process if it did not terminate
 
-        # Reset state
-        self.current_stdout = None
-        self.current_stderr = None
-        self.process = None
+            # Reset state
+            self.current_stdout = None
+            self.current_stderr = None
+            self.process = None
+        else:
+            logging.warning("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
     def compile_finished(self, exitcode):
@@ -223,22 +246,12 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
         self.current_stderr = None
         self.process = None
 
-    def handle_ready_stdout(self):
-        """Store and Emit stdout as plain text signal."""
-        stdout = bytes(self.process.readAllStandardOutput()).decode("utf8")
-        self.current_stdout += stdout
-        self.new_stdout.emit(stdout)
-        print("STDOUT:" + stdout)
-
-    def handle_ready_stderr(self):
-        """Store and Emit stderr as plain text signal."""
-        stderr = bytes(self.process.readAllStandardError()).decode("utf8")
-        self.current_stderr += stderr
-        self.new_stderr.emit(stderr)
-
+    def process_stderr(self, stderr):
+        """Trigger appropriate signals and log when stderr is available."""
         if text_compiling in stderr:
             self.start_time = time.time()
             logger.debug("Compilation started.")
+            self.compilation_started.emit()
 
         if text_compiled_erroniously in stderr:
             self.end_time = time.time()
@@ -252,15 +265,3 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             logger.debug(f"Compiled {self.fin} successfully in {(self.end_time - self.start_time)*1000:.2f}ms.")
             self.document_changed.emit()
             self.compilation_finished.emit()
-
-    @QtCore.Slot(str)
-    def set_fin(self, fin):
-        """Set input file path."""
-        if isinstance(fin, str):
-            self.fin = fin
-
-    @QtCore.Slot(str)
-    def set_fout(self, fout):
-        """Set output file path."""
-        if isinstance(fout, str):
-            self.fout = fout
