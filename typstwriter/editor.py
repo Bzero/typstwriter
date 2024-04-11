@@ -4,6 +4,8 @@ from qtpy import QtWidgets
 
 import os
 
+import superqt.utils
+
 import util
 
 import logging
@@ -219,6 +221,13 @@ class EditorPage(QtWidgets.QFrame):
 
         self.edit = QtWidgets.QPlainTextEdit()
         self.verticalLayout.addWidget(self.edit)
+
+        highlight_style = config.get("Editor", "highlighter-style")
+        self.highlighter = superqt.utils.CodeSyntaxHighlight(self.edit.document(), "typst", highlight_style)
+
+        palette = self.edit.palette()
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
+        self.edit.setPalette(palette)
 
         self.edit.textChanged.connect(self.modified)
 
