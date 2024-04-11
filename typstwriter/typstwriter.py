@@ -17,12 +17,15 @@ def setup_logger(level):
     handler.setFormatter(formatter)
     log = logging.root
     log.addHandler(handler)
-    log.setLevel(level)
+    if level in ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]:
+        log.setLevel(level)
+    else:
+        log.setLevel("INFO")
 
 
 def main():
     """Run Typstwriter."""
-    setup_logger(logging.INFO)
+    setup_logger(os.environ.get('LOGLEVEL'))
     logger = logging.getLogger(__name__)
 
     logger.info("Typstwriter started")
