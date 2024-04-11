@@ -1,5 +1,3 @@
-"""Typstwriter is an editor for the typst typesetting system."""
+"""Typstwriter is an integrated editor for the typst typesetting system."""
 
-import typstwriter
-
-typstwriter.main()
+__version__ = 1.0
