@@ -4,7 +4,7 @@ from qtpy import QtWidgets
 
 import collections
 import os
-import sys
+import platform
 import subprocess
 
 import logging
@@ -39,12 +39,13 @@ class RecentFilesModel(QtCore.QAbstractListModel):
         """Return the filepath (or its icon) stored under a given index."""
         path = self.recent_files[index.row()]
 
-        if role == QtCore.Qt.DisplayRole:
-            return path
-        elif role == QtCore.Qt.DecorationRole:
-            return FileIconProvider().icon(QtCore.QFileInfo(path))
-        else:
-            return None
+        match role:
+            case QtCore.Qt.DisplayRole:
+                return path
+            case QtCore.Qt.DecorationRole:
+                return FileIconProvider().icon(QtCore.QFileInfo(path))
+            case _:
+                return None
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole): # noqa: N802 This is an overriding function
         """Return the header name."""
@@ -119,16 +120,17 @@ class RecentFiles(QtCore.QObject):
 def open_with_external_program(path):
     """Open a file in an external program."""
     if os.path.exists(path):
-        if sys.platform.startswith("win"):
-            os.startfile(path)
-        elif sys.platform.startswith("darwin"):
-            subprocess.call(["open", path])
-        elif sys.platform.startswith("linux"):
-            subprocess.call(["xdg-open", path])
-        else:
-            logger.error("Unsupported system :" + str(sys.platform))
+        match platform.system():
+            case "Linux":
+                subprocess.call(["xdg-open", path])
+            case "Windows":
+                os.startfile(path)
+            case "Darwin":
+                subprocess.call(["open", path])
+            case _:
+                logger.error(f"Unsupported system : {platform.system()}.")
     else:
-        logger.warning("Attempted to open file with external program {path} is not a valid path.")
+        logger.warning(f"Attempted to open file with external program but {path} is not a valid path.")
 
 
 def pdf_path(typst_path):

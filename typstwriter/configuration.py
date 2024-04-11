@@ -46,18 +46,18 @@ class ConfigManager:
 
     def get(self, section, key, typ="str"):
         """Get config value."""
-        if typ in ["int", "integer"]:
-            value = self.config.getint(section, key)
-        elif typ in ["float"]:
-            value = self.config.getfloat(section, key)
-        elif typ in ["bool", "boolean"]:
-            value = self.config.getboolean(section, key)
-        elif typ in ["str", "string"]:
-            value = self.config.get(section, key)
-        else:
-            logger.error(f"Unknown type '{str(typ)}'")
-            return None
-        return value
+        match typ:
+            case "int" | "integer":
+                return self.config.getint(section, key)
+            case "float":
+                return self.config.getfloat(section, key)
+            case "bool" | "boolean":
+                return self.config.getboolean(section, key)
+            case "str" | "string":
+                return self.config.get(section, key)
+            case _:
+                logger.error(f"Unknown type '{str(typ)}'")
+                return None
 
     def set(self, section, key, value):
         """Set config value."""

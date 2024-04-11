@@ -297,14 +297,13 @@ class EditorPage(QtWidgets.QFrame):
             box.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
             box.setDefaultButton(QtWidgets.QMessageBox.Save)
 
-            ans = box.exec()
-
-            if ans == QtWidgets.QMessageBox.Save:
-                return self.save()
-            elif ans == QtWidgets.QMessageBox.Discard:
-                return True
-            elif ans == QtWidgets.QMessageBox.Cancel:
-                return False
+            match box.exec():
+                case QtWidgets.QMessageBox.Save:
+                    return self.save()
+                case QtWidgets.QMessageBox.Discard:
+                    return True
+                case QtWidgets.QMessageBox.Cancel:
+                    return False
 
         return True
 
