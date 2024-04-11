@@ -16,7 +16,8 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
 default_config = {"General": {"WorkingDirectory": "vaasdfasdflue2"},
                   "Compiler": {"Name": "typst",
                                "Mode": "OnDemand"},
-                  "Editor": {"saveatrun": "true"},
+                  "Editor": {"saveatrun": "true",
+                             "highlighter-style": "sas"},  # Can be any style from https://pygments.org/styles/
                   "Internals": {"recentFilesPath": "~/.config/typstwriter/recentFiles.txt",
                                 "recentFilesLength": 16}}
 
