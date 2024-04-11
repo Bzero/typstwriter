@@ -11,6 +11,7 @@ import fs_explorer
 import compiler_tools
 import compiler
 import util
+import enums
 
 import logging
 import configuration
@@ -97,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOutputdock)
 
         # CompilerConnector
-        self.CompilerConnector = compiler.CompilerConnector_FS_onDemand(self)
+        self.CompilerConnector = compiler.WrappedCompilerConnector(state.compiler_mode.Value)
 
         # Connect signals and slots
         self.actions.new_File.triggered.connect(self.editor.new_file)

@@ -1,7 +1,8 @@
 import time
-import enum
 
 from qtpy import QtCore
+
+import enums
 
 import logging
 import configuration
@@ -11,8 +12,6 @@ logger = logging.getLogger(__name__)
 config = configuration.Config
 state = globalstate.State
 
-
-cmode = enum.Enum("compilation_mode", ["on_demand", "live"])
 
 text_compiling = "compiling ..."
 text_compiled_erroniously = "compiled with errors"
@@ -109,7 +108,7 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
 class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
     """CompilerConnector using the filesystem and compiling on demand."""
 
-    compiler_mode = cmode.on_demand
+    compiler_mode = enums.compiler_mode.on_demand
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
@@ -188,7 +187,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
 class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
     """CompilerConnector using the filesystem and compiling live."""
 
-    compiler_mode = cmode.live
+    compiler_mode = enums.compiler_mode.live
 
     def __init__(self, fin=None, fout=None):
         """Initialize the connector."""
@@ -292,11 +291,11 @@ class WrappedCompilerConnector(QtCore.QObject):
     def set_compiler(self, compiler_mode, fin=None, fout=None):
         """Create new compiler."""
         match compiler_mode:
-            case cmode.on_demand:
+            case enums.compiler_mode.on_demand:
                 self.CompilerConnector = CompilerConnector_FS_onDemand(fin, fout)
                 self.connect_signals()
                 logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
-            case cmode.live:
+            case enums.compiler_mode.live:
                 self.CompilerConnector = CompilerConnector_FS_live(fin, fout)
                 self.connect_signals()
                 logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
