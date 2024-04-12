@@ -32,6 +32,8 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     source_changed(): Notify the compiler that the source changed.
 
     Signals:
+    started(): Emitted when the compiler process startd.
+    stopped(): Emitted when the compiler process stopped.
     compilation_started(): Emitted when the compilation starts.
     compilation_finished(): Emitted when compilation finishes(regardsless of success).
     document_changed(): Emitted when the output document has changed.
@@ -39,6 +41,8 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     new_stdout(str): Emitted when new stdout is available.
     """
 
+    started = QtCore.Signal()
+    stopped = QtCore.Signal()
     compilation_started = QtCore.Signal()
     compilation_finished = QtCore.Signal()
     document_changed = QtCore.Signal()
@@ -120,7 +124,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.process = QtCore.QProcess()
             self.process.setProgram(self.compiler)
             self.process.setArguments([self.subcommand, self.fin, self.fout])
-            self.process.finished.connect(self.compile_finished)
+            self.process.finished.connect(self.process_finished)
             self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
             self.process.readyReadStandardError.connect(self.handle_ready_stderr)
 
@@ -128,6 +132,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.current_stderr = ""
 
             logger.debug("Compilation started.")
+            self.started.emit()
             self.compilation_started.emit()
             self.start_time = time.time()
             self.process.start()
@@ -148,14 +153,17 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             #TODO: kill process if it did not terminate
 
             self.recompile_scheduled = False
-            self.compilation_finished(-1)
+            self.process_finished(-1)
         else:
             logging.warning("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
-    def compile_finished(self, exitcode):
+    def process_finished(self, exitcode):
         """Finalize the compilation and trigger apropriate signals."""
         self.end_time = time.time()
+
+        self.compilation_finished.emit()
+        self.stopped.emit()
 
         self.current_stdout = None
         self.current_stderr = None
@@ -167,8 +175,6 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.document_changed.emit()
         else:
             logger.debug(f"Compiled {self.fin} with error in {(self.end_time - self.start_time)*1000:.2f}ms.")
-
-        self.compilation_finished.emit()
 
     @QtCore.Slot()
     def check_recompilation(self):
@@ -197,15 +203,15 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             self.process = QtCore.QProcess()
             self.process.setProgram(self.compiler)
             self.process.setArguments([self.subcommand, self.fin, self.fout])
-            self.process.finished.connect(self.compile_finished)
+            self.process.finished.connect(self.compiler_terminated)
             self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
             self.process.readyReadStandardError.connect(self.handle_ready_stderr)
 
             self.current_stdout = ""
             self.current_stderr = ""
 
-            logger.debug("Compilation started.")
-            self.compilation_started.emit()
+            logger.debug("Compiler started.")
+            self.started.emit()
             self.start_time = time.time()
             self.process.start()
         else:
@@ -224,6 +230,8 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
             #TODO: kill process if it did not terminate
 
+            self.stopped.emit()
+
             # Reset state
             self.current_stdout = None
             self.current_stderr = None
@@ -232,9 +240,10 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             logging.warning("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
-    def compile_finished(self, exitcode):
+    def compiler_terminated(self, exitcode):
         """Cleanup if the compiler stops unexpectedly."""
         logger.debug(f"Compiler stopped with exit code {exitcode}.")
+        self.stopped.emit()
 
         self.current_stdout = None
         self.current_stderr = None
@@ -272,6 +281,8 @@ class WrappedCompilerConnector(QtCore.QObject):
     (e.g. to switch modes) without the need to reconnect all signals and slots to the new instance.
     """
 
+    started = QtCore.Signal()
+    stopped = QtCore.Signal()
     compilation_started = QtCore.Signal()
     compilation_finished = QtCore.Signal()
     document_changed = QtCore.Signal()
@@ -299,7 +310,7 @@ class WrappedCompilerConnector(QtCore.QObject):
                 #Use CompilerConnector_FS as a dummy which just ignores all start or compile commands
                 self.CompilerConnector = CompilerConnector_FS(fin, fout)
                 self.connect_signals()
-                logging.warn(f"Attempted to create a new compiler but {compiler_mode} is not a valid compiler mode.")
+                logging.warning(f"Attempted to create a new compiler but {compiler_mode} is not a valid compiler mode.")
 
     def switch_compiler(self, compiler_mode):
         """Switch to a new compiler while keeping fin and fout."""
@@ -316,6 +327,8 @@ class WrappedCompilerConnector(QtCore.QObject):
 
     def connect_signals(self):
         """Connect wrapper signals to compiler signals."""
+        self.CompilerConnector.started.connect(self.relay_started)
+        self.CompilerConnector.stopped.connect(self.relay_stopped)
         self.CompilerConnector.compilation_started.connect(self.relay_compilation_started)
         self.CompilerConnector.compilation_finished.connect(self.relay_compilation_finished)
         self.CompilerConnector.document_changed.connect(self.relay_document_changed)
@@ -324,6 +337,8 @@ class WrappedCompilerConnector(QtCore.QObject):
 
     def disconnect_signals(self):
         """Disconnect wrapper signals from compiler signals."""
+        self.CompilerConnector.started.disconnect(self.relay_started)
+        self.CompilerConnector.stopped.disconnect(self.relay_stopped)
         self.CompilerConnector.compilation_started.disconnect(self.relay_compilation_started)
         self.CompilerConnector.compilation_finished.disconnect(self.relay_compilation_finished)
         self.CompilerConnector.document_changed.disconnect(self.relay_document_changed)
@@ -354,6 +369,14 @@ class WrappedCompilerConnector(QtCore.QObject):
     def source_changed(self):
         """Relay source_changed to compiler."""
         self.CompilerConnector.source_changed()
+
+    def relay_started(self):
+        """Relay started to compiler."""
+        self.started.emit()
+
+    def relay_stopped(self):
+        """Relay stopped to compiler."""
+        self.stopped.emit()
 
     def relay_compilation_started(self):
         """Relay compilation_started to compiler."""
