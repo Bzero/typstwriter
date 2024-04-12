@@ -23,17 +23,16 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
     Abstract Class to build the interface between typstwriter and the typst backend using the filesystem for input and output.
 
     Functions:
-    set_fin(fin): Set input file path
-    set_fout(fout): Set output file path
+    set_fin(fin): Set input file path.
+    set_fout(fout): Set output file path.
 
     Slots:
-    start(): Instructs the CompilerConnector to start its process. On demand variants may ignore this signal.
+    start(): Instructs the CompilerConnector to start its process.
     stop(): Instructs the CompilerConnector to stop its process.
-    compile(): Instructs the CompilerConnector to (re)compile. Live variants may ignore this signal.
-    input_changed(): Notifies the CompilerConnector that the input files have changed.
+    source_changed(): Notify the compiler that the source changed.
 
     Signals:
-    compilation_started(): Emitted when the compilation starts
+    compilation_started(): Emitted when the compilation starts.
     compilation_finished(): Emitted when compilation finishes(regardsless of success).
     document_changed(): Emitted when the output document has changed.
     new_stderr(str): Emitted when new stderr is available.
@@ -85,11 +84,6 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
         self.new_stderr.emit(stderr)
 
     @QtCore.Slot()
-    def compile(self):
-        """Compile."""
-        pass
-
-    @QtCore.Slot()
     def start(self):
         """Start."""
         pass
@@ -101,8 +95,9 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
 
     @QtCore.Slot()
     def source_changed(self):
-        """Update source."""
+        """Notify the compiler that the source changed."""
         pass
+
 
 
 class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
@@ -119,8 +114,8 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
         self.compilation_finished.connect(self.check_recompilation)
 
     @QtCore.Slot()
-    def compile(self):
-        """Compile. If compilation is already ongoing, schedule recompilation."""
+    def start(self):
+        """Start the compiler."""
         if self.process is None:
             self.process = QtCore.QProcess()
             self.process.setProgram(self.compiler)
@@ -156,7 +151,6 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.compilation_finished(-1)
         else:
             logging.warning("Attempted to stop the compiler but it is not running.")
-
 
     @QtCore.Slot(int)
     def compile_finished(self, exitcode):
@@ -196,6 +190,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
         self.subcommand = "watch"
         self.new_stderr.connect(self.process_stderr)
 
+    @QtCore.Slot()
     def start(self):
         """Start the compiler."""
         if self.process is None:
@@ -216,6 +211,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
         else:
             logging.warning("Attempted to start the compiler but it is already running.")
 
+    @QtCore.Slot()
     def stop(self):
         """Stop the compiler."""
         if self.process is not None:
@@ -343,11 +339,6 @@ class WrappedCompilerConnector(QtCore.QObject):
     def set_fout(self, fout):
         """Relay set_fout to compiler."""
         self.CompilerConnector.set_fout(fout)
-
-    @QtCore.Slot()
-    def compile(self):
-        """Relay compile to compiler."""
-        self.CompilerConnector.compile()
 
     @QtCore.Slot()
     def start(self):

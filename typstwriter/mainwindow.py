@@ -122,7 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_fs_explorer.setChecked(True)
         self.actions.show_compiler_options.setChecked(True)
         self.actions.show_compiler_output.setChecked(True)
-        self.actions.run.triggered.connect(self.CompilerConnector.compile)
+        self.actions.run.triggered.connect(self.CompilerConnector.start)
         self.actions.open_config.triggered.connect(self.open_config)
 
         self.FSExplorer.open_file.connect(self.editor.open_file)
