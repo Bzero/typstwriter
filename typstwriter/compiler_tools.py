@@ -4,6 +4,8 @@ from qtpy import QtWidgets
 
 import os
 
+import enums
+
 import logging
 import configuration
 import globalstate
@@ -40,7 +42,10 @@ class CompilerOptions(QtWidgets.QWidget):
         # Mode
         self.label_mode = QtWidgets.QLabel("Mode")
         self.combo_box_mode = QtWidgets.QComboBox()
-        self.combo_box_mode.addItem("On Demand")  # For now there is only one compiler mode.
+        self.combo_box_mode.addItem("On Demand", enums.compiler_mode.on_demand)
+        self.combo_box_mode.addItem("Live", enums.compiler_mode.live)
+        self.combo_box_mode.currentIndexChanged.connect(self.mode_changed)
+        self.combo_box_mode.setCurrentIndex(self.combo_box_mode.findData(state.compiler_mode.Value))
 
         # Main file
         self.label_main = QtWidgets.QLabel("Main file")
@@ -81,6 +86,12 @@ class CompilerOptions(QtWidgets.QWidget):
     def main_changed(self, path):
         """Update display of main file."""
         self.line_edit_main.setText(path)
+
+    @QtCore.Slot(int)
+    def mode_changed(self, index):
+        """Update the compiler mode."""
+        mode = self.combo_box_mode.itemData(index)
+        state.compiler_mode.Value = mode
 
 
 class CompilerOutput(QtWidgets.QWidget):
