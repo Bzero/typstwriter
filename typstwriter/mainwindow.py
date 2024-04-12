@@ -11,6 +11,7 @@ import fs_explorer
 import compiler_tools
 import compiler
 import util
+import enums
 
 import logging
 import configuration
@@ -97,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOutputdock)
 
         # CompilerConnector
-        self.CompilerConnector = compiler.CompilerConnector_FS_onDemand(self)
+        self.CompilerConnector = compiler.WrappedCompilerConnector(state.compiler_mode.Value)
 
         # Connect signals and slots
         self.actions.new_File.triggered.connect(self.editor.new_file)
@@ -121,7 +122,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_fs_explorer.setChecked(True)
         self.actions.show_compiler_options.setChecked(True)
         self.actions.show_compiler_output.setChecked(True)
-        self.actions.run.triggered.connect(self.CompilerConnector.compile)
+        self.actions.run.activated.connect(self.CompilerConnector.start)
+        self.actions.run.deactivated.connect(self.CompilerConnector.stop)
+        self.CompilerConnector.started.connect(lambda: self.actions.run.setChecked(True))
+        self.CompilerConnector.stopped.connect(lambda: self.actions.run.setChecked(False))
         self.actions.open_config.triggered.connect(self.open_config)
 
         self.FSExplorer.open_file.connect(self.editor.open_file)
@@ -136,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
         self.CompilerConnector.new_stderr.connect(self.CompilerOutput.append_to_block)
+        state.compiler_mode.Signal.connect(self.CompilerConnector.switch_compiler)
 
         # if config.get("Editor", "saveatrun", typ="bool"):
             # self.actions.run.triggered.connect(self.editor.save())
@@ -191,6 +196,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):  # noqa: N802
         """Handle close event."""
+        self.CompilerConnector.stop()
         s = self.editor.tryclose()
         if s:
             event.accept()

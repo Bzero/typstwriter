@@ -2,6 +2,8 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
+import util
+
 import logging
 import configuration
 import globalstate
@@ -105,8 +107,14 @@ class Actions(QtCore.QObject):
         self.open_config = QtWidgets.QAction(self)
         self.open_config.setText("Open config file")
 
-        #TODO: Use 'On' state while compiling
-        self.run = QtGui.QAction(self)
-        self.run.setIcon(QtGui.QIcon("icons/play.svg"))
-        self.run.setText(u"Run")
-        self.run.setShortcut(u"Ctrl+R")
+        self.run = util.TogglingAction(self)
+        icon = QtGui.QIcon()
+        icon.addFile("icons/start.svg", state=QtGui.QIcon.State.Off)
+        icon.addFile("icons/stop.svg", state=QtGui.QIcon.State.On)
+        self.run.setIcon(icon)
+        self.run.setText("Start", state=QtGui.QIcon.State.Off)
+        self.run.setText("Stop", state=QtGui.QIcon.State.On)
+        self.run.setShortcut("Ctrl+R")
+
+
+

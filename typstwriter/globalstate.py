@@ -1,5 +1,7 @@
 from qtpy import QtCore
 
+import enums
+
 import logging
 import configuration
 
@@ -37,6 +39,7 @@ class GlobalState():
         self.working_directory = SingleState(config.get("General", "WorkingDirectory"))
         self.compiler_running = SingleState(False)
         self.main_file = SingleState(None)
+        self.compiler_mode = SingleState(enums.compiler_mode[config.get("Compiler", "Mode")])
 
 
 # Instantiate the State singleton

@@ -138,3 +138,46 @@ def pdf_path(typst_path):
     (trunk, ext) = os.path.splitext(typst_path)
     pdf_path = trunk + ".pdf"
     return pdf_path
+
+
+class TogglingAction(QtWidgets.QAction):
+    """
+    A QAction that can be toggled.
+
+    It automatically changes text and icon when being toggled.
+    Toggling cuuses the activated/deactivated signals being emitted.
+    """
+
+    activated = QtCore.Signal()
+    deactivated = QtCore.Signal()
+
+    def __init__(self, parent):
+        """Init."""
+        QtWidgets.QAction.__init__(self, parent)
+        self.setCheckable(True)
+        self.text_on = ""
+        self.text_off = ""
+        self.toggled.connect(self.handle_toggled)
+
+    def setText(self, text, state=None):
+        """Extend parent setText with state information."""
+        if state == QtGui.QIcon.State.On or state is None:
+            self.text_on = text
+        if state == QtGui.QIcon.State.Off or state is None:
+            self.text_off = text
+        self.update_text()
+
+    def update_text(self):
+        """Update text when toggling."""
+        if self.isChecked() is True:
+            super().setText(self.text_on)
+        else:
+            super().setText(self.text_off)
+
+    def handle_toggled(self, checked):
+        """Handle toggling."""
+        self.update_text()
+        if checked:
+            self.activated.emit()
+        else:
+            self.deactivated.emit()
