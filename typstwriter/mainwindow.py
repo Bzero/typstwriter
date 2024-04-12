@@ -192,6 +192,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):  # noqa: N802
         """Handle close event."""
+        self.CompilerConnector.stop()
         s = self.editor.tryclose()
         if s:
             event.accept()
