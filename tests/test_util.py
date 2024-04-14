@@ -3,7 +3,7 @@ from qtpy import QtGui
 
 import logging
 
-import util
+from typstwriter import util
 
 
 class TestFileIconProvider:
