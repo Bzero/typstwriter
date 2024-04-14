@@ -53,7 +53,7 @@ class Editor(QtWidgets.QFrame):
         """Open a new, empty file."""
         editorpage = EditorPage()
         name = "*new*"
-        icon = QtGui.QIcon("icons/newFile.svg")
+        icon = QtGui.QIcon(util.icon_path("newFile.svg"))
         self.TabWidget.addTab(editorpage, icon, name)
         self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
         self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("green"))
@@ -328,7 +328,7 @@ class EditorPage(QtWidgets.QFrame):
         self.gridLayout = QtWidgets.QGridLayout()
 
         self.label_w = QtWidgets.QLabel()
-        self.label_w.setPixmap(QtGui.QPixmap("icons/warning.svg"))
+        self.label_w.setPixmap(QtGui.QPixmap(util.icon_path("warning.svg")))
         self.label_t = QtWidgets.QLabel("<h1>" + msg + "</h1>")
 
         self.gridLayout.addWidget(self.label_w, 0, 1)

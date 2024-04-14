@@ -2,6 +2,8 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
+from typstwriter import util
+
 import logging
 from typstwriter import configuration
 from typstwriter import globalstate
@@ -69,7 +71,7 @@ class RecentFilesMenu(QtWidgets.QMenu):
         """Init."""
         QtWidgets.QMenu.__init__(self)
 
-        self.setIcon(QtGui.QIcon("icons/recentFile.svg"))
+        self.setIcon(QtGui.QIcon(util.icon_path("recentFile.svg")))
         self.setTitle("Open recent file")
 
         self.addAction("")

@@ -23,7 +23,7 @@ class FileIconProvider(QtWidgets.QFileIconProvider):
         """Return icon associated with info."""
         if isinstance(info, QtCore.QFileInfo):
             if info.suffix() == "typ":
-                return QtGui.QIcon("icons/typst.png")
+                return QtGui.QIcon(icon_path("typst.png"))
         return super().icon(info)
 
 
@@ -181,3 +181,10 @@ class TogglingAction(QtWidgets.QAction):
             self.activated.emit()
         else:
             self.deactivated.emit()
+
+
+def icon_path(name):
+    """Get an icon by filename."""
+    packagedir = os.path.dirname(__file__)
+    path = os.path.join(packagedir, "icons", name)
+    return path
