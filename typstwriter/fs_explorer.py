@@ -4,11 +4,11 @@ from qtpy import QtWidgets
 
 import os
 
-import util
+from typstwriter import util
 
 import logging
-import configuration
-import globalstate
+from typstwriter import configuration
+from typstwriter import globalstate
 
 logger = logging.getLogger(__name__)
 config = configuration.Config

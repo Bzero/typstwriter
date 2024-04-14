@@ -1,9 +1,9 @@
 from qtpy import QtCore
 
-import enums
+from typstwriter import enums
 
 import logging
-import configuration
+from typstwriter import configuration
 
 logger = logging.getLogger(__name__)
 config = configuration.Config

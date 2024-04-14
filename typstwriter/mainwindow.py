@@ -2,20 +2,20 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
-import menubar
-import toolbar
-import actions
-import editor
-import pdf_viewer
-import fs_explorer
-import compiler_tools
-import compiler
-import util
-import enums
+from typstwriter import menubar
+from typstwriter import toolbar
+from typstwriter import actions
+from typstwriter import editor
+from typstwriter import pdf_viewer
+from typstwriter import fs_explorer
+from typstwriter import compiler_tools
+from typstwriter import compiler
+from typstwriter import util
+from typstwriter import enums
 
 import logging
-import configuration
-import globalstate
+from typstwriter import configuration
+from typstwriter import globalstate
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
