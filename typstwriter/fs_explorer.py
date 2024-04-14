@@ -4,11 +4,11 @@ from qtpy import QtWidgets
 
 import os
 
-import util
+from typstwriter import util
 
 import logging
-import configuration
-import globalstate
+from typstwriter import configuration
+from typstwriter import globalstate
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
@@ -128,7 +128,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.pathBar = QtWidgets.QLineEdit(self)
         self.pathBar.setText("")
         self.pathBar.editingFinished.connect(self.line_edited)
-        self.folderAction = QtWidgets.QAction(QtGui.QIcon("icons/folder.svg"), "open")
+        self.folderAction = QtWidgets.QAction(QtGui.QIcon(util.icon_path("folder.svg")), "open")
         self.folderAction.triggered.connect(self.open_directory_dialog)
         self.pathBar.addAction(self.folderAction, QtWidgets.QLineEdit.LeadingPosition)
 

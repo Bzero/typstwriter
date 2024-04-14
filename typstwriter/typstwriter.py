@@ -32,14 +32,14 @@ def main():
 
     # Initialise Config
     logger.info("Reading Config")
-    import configuration # noqa: F401
+    from typstwriter import configuration # noqa: F401
 
     # Initialise State
     logger.info("Initialising State")
-    import globalstate  # noqa: F401
+    from typstwriter import globalstate  # noqa: F401
 
     # With logging, config and state set up, import the main GUI
-    import mainwindow
+    from typstwriter import mainwindow
 
     # Make sure the application can receive SIGINT
     signal.signal(signal.SIGINT, signal.SIG_DFL)

@@ -8,13 +8,14 @@ from qtpy import QtWidgets
 from qtpy import QtCore
 from qtpy import QtGui
 
-import util
 import os
 from time import time
 
+from typstwriter import util
+
 import logging
-import configuration
-import globalstate
+from typstwriter import configuration
+from typstwriter import globalstate
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
@@ -91,30 +92,30 @@ class PDFViewer(QtWidgets.QFrame):
 
         # Action Zoom In
         self.actionZoom_In = QtGui.QAction(self)
-        self.actionZoom_In.setIcon(QtGui.QIcon("icons/plus.svg"))
+        self.actionZoom_In.setIcon(QtGui.QIcon(util.icon_path("plus.svg")))
         self.actionZoom_In.setText("Zoom In")
         self.actionZoom_In.setShortcut(u"Ctrl++")
 
         # Action Zoom Out
         self.actionZoom_Out = QtGui.QAction(self)
-        self.actionZoom_Out.setIcon(QtGui.QIcon("icons/minus.svg"))
+        self.actionZoom_Out.setIcon(QtGui.QIcon(util.icon_path("minus.svg")))
         self.actionZoom_Out.setText("Zoom Out")
         self.actionZoom_Out.setShortcut(u"Ctrl+-")
 
         # Action Previous Page
         self.actionPrevious_Page = QtGui.QAction(self)
-        self.actionPrevious_Page.setIcon(QtGui.QIcon("icons/larrow.svg"))
+        self.actionPrevious_Page.setIcon(QtGui.QIcon(util.icon_path("larrow.svg")))
         self.actionPrevious_Page.setText("Previous Page")
 
         # Action Next Page
         self.actionNext_Page = QtGui.QAction(self)
-        self.actionNext_Page.setIcon(QtGui.QIcon("icons/rarrow.svg"))
+        self.actionNext_Page.setIcon(QtGui.QIcon(util.icon_path("rarrow.svg")))
         self.actionNext_Page.setText("Next Page")
         self.actionPrevious_Page.setShortcut(u"PgUp")
 
         # Action External Viewer
         self.actionOpen_External = QtGui.QAction(self)
-        self.actionOpen_External.setIcon(QtGui.QIcon("icons/pdf.svg"))
+        self.actionOpen_External.setIcon(QtGui.QIcon(util.icon_path("pdf.svg")))
         self.actionOpen_External.setText("External Viewer")
         self.actionNext_Page.setShortcut(u"PgDown")
 

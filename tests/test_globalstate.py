@@ -1,6 +1,6 @@
 import pytest
 
-import globalstate
+from typstwriter import globalstate
 
 
 class TestSingleState:

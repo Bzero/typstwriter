@@ -1,0 +1,59 @@
+[project]
+name = "typstwriter"
+description = "An integrated editor for the typst typesetting system."
+authors = [{name = "Bzero", email = "B_0@posteo.net"}]
+readme = "README.md"
+license = {text = "MIT License"}
+requires-python = ">=3.10"
+keywords = ["typst"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Text Editors",
+    "Topic :: Text Editors :: Word Processors",
+]
+dependencies = [
+"qtpy >= 2.3",
+"pygments >= 2.18",
+"superqt >= 0.3.3"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+  "pytest-qt"
+]
+
+[project.urls]
+Repository = "https://github.com/Bzero/typstwriter"
+
+[project.gui-scripts]
+typstwriter = "typstwriter.typstwriter:main"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+line-length = 128
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "N", "D", "Q", "PTH", "PL", "R", "C", "B", "C4", "G", "PT", "RET", "RUF", "SIM", "UP"]
+ignore = ["D212", "D203", "D400", "RET505", "D100", "PLR0915", "RET504"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = false
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+filterwarnings = ["error"]
+pythonpath = "."
+testpaths = "tests"

@@ -1,3 +1,3 @@
 """Typstwriter is an integrated editor for the typst typesetting system."""
 
-__version__ = 1.0
+__version__ = "0.0"
