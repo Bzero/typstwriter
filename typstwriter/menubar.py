@@ -4,7 +4,7 @@ from qtpy import QtWidgets
 
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 

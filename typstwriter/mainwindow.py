@@ -13,7 +13,7 @@ from typstwriter import compiler
 from typstwriter import util
 from typstwriter import enums
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 

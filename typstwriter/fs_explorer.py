@@ -6,7 +6,7 @@ import os
 
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -183,7 +183,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.completer_filesystem_model.setRootPath(root)
         self.pathBar.setText(root)
         state.working_directory.Value = root
-        logger.debug(f"Change Working Directory to '{root}'.")
+        logger.debug("Change Working Directory to {!r}.", root)
         # self.directoryChanged.emit(root)
 
     @QtCore.Slot()
@@ -194,7 +194,7 @@ class FSExplorer(QtWidgets.QWidget):
             self.set_root(root)
         else:
             self.pathBar.setText(self.root)
-            logger.info(f"Attempted to change Working Directory but '{root}' is not a valid directory.")
+            logger.info("Attempted to change Working Directory but {!r} is not a valid directory.", root)
 
     @QtCore.Slot(QtCore.QModelIndex)
     def doubleclicked(self, index):
@@ -248,7 +248,7 @@ class FSExplorer(QtWidgets.QWidget):
         if not os.path.exists(path) or overwrite:
             open(path, "w").close()
         else:
-            logger.warn(f"File '{path}' already exists. Will not overwrite.")
+            logger.warning("File {!r} already exists. Will not overwrite.", path)
             QtWidgets.QMessageBox.warning(self, "Typstwriter", f"File '{path}' already exists.\nWill not overwrite.")
 
     def new_folder_in_dir(self, head_path):
@@ -263,7 +263,7 @@ class FSExplorer(QtWidgets.QWidget):
         if not os.path.exists(path) or overwrite:
             os.makedirs(path)
         else:
-            logger.warn(f"Folder '{path}' already exists. Will not overwrite.")
+            logger.warning("Folder {!r} already exists. Will not overwrite.", path)
             QtWidgets.QMessageBox.warning(self, "Typstwriter", f"Folder '{path}' already exists.\nWill not overwrite.")
 
     def rename_from(self, path_from):
@@ -279,7 +279,7 @@ class FSExplorer(QtWidgets.QWidget):
         if not os.path.exists(path_to) or overwrite:
             os.rename(path_from, path_to)
         else:
-            logger.warn(f"'{path_to}' already exists. Will not overwrite.")
+            logger.warning("{!r} already exists. Will not overwrite.", path_to)
             QtWidgets.QMessageBox.warning(self, "Typstwriter", f"'{path_to}' already exists.\nWill not overwrite.")
 
     def delete(self, path):

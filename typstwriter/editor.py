@@ -8,7 +8,7 @@ import superqt.utils
 
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -250,13 +250,13 @@ class EditorPage(QtWidgets.QFrame):
             self.isloaded = True
 
         except UnicodeError:
-            msg = f"'{path}' is not a text file."
+            msg = f"{path!r} is not a text file."
             logger.warning(msg)
             self.show_error(msg)
             self.isloaded = False
 
         except OSError:
-            msg = f"'{path}' is not a valid file."
+            msg = f"{path!r} is not a valid file."
             logger.warning(msg)
             self.show_error(msg)
             self.isloaded = False
@@ -266,7 +266,7 @@ class EditorPage(QtWidgets.QFrame):
         if not self.path:
             return self.save_as()
 
-        logger.info(f"Saving to: {self.path}.")
+        logger.info("Saving to: {!r}.", self.path)
 
         try:
             with open(self.path, "w") as f:
@@ -276,7 +276,7 @@ class EditorPage(QtWidgets.QFrame):
             self.savestatechanged.emit(self.issaved)
             return True
         except OSError:
-            logger.info(f"Could not saved file {self.path}")
+            logger.info("Could not saved file {!r}", self.path)
             return False
 
     def save_as(self):
@@ -289,7 +289,7 @@ class EditorPage(QtWidgets.QFrame):
             self.pathchanged.emit(self.path)
             return True
         else:
-            logger.info(f"Attempted to save file but {path} is not a valid path")
+            logger.info("Attempted to save file but {!r} is not a valid path", path)
             return False
 
     def tryclose(self):

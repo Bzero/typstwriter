@@ -7,7 +7,7 @@ import os
 from typstwriter import enums
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -71,7 +71,7 @@ class CompilerOptions(QtWidgets.QWidget):
             state.main_file.Value = path
         else:
             self.line_edit_main.setText(state.main_file.Value)
-            logger.info(f"Attempted to set main file but '{path}' is not a valid path.")
+            logger.info("Attempted to set main file but {!r} is not a valid path.", path)
 
     @QtCore.Slot()
     def open_file_dialog(self):

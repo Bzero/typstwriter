@@ -13,7 +13,7 @@ from time import time
 
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -202,7 +202,7 @@ class PDFViewer(QtWidgets.QFrame):
             self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
         else:
             self.m_document.close()
-            logger.warn(f"{path} is not a valid  file")
+            logger.warning("{!r} is not a valid  file", path)
 
     @QtCore.Slot()
     def reload(self):
@@ -222,7 +222,7 @@ class PDFViewer(QtWidgets.QFrame):
         # scroll back to same point
         self.pdfView.verticalScrollBar().setValue(pos)
 
-        logger.debug(f"Reloaded from disk in {(t2-t1)*1000:.2f}ms.")
+        logger.debug("Reloaded from disk in {:.2f}ms.", (t2-t1)*1000)
 
     @QtCore.Slot(int)
     def page_selected(self, page):
