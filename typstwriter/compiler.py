@@ -4,7 +4,7 @@ from qtpy import QtCore
 
 from typstwriter import enums
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -155,12 +155,13 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.recompile_scheduled = False
             self.process_finished(-1)
         else:
-            logging.warning("Attempted to stop the compiler but it is not running.")
+            logger.warning("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
     def process_finished(self, exitcode):
         """Finalize the compilation and trigger apropriate signals."""
         self.end_time = time.time()
+        Δ_t = (self.end_time - self.start_time)
 
         self.compilation_finished.emit()
         self.stopped.emit()
@@ -171,10 +172,10 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
         self.process = None
 
         if exitcode == 0:
-            logger.debug(f"Compiled {self.fin} successfully in {(self.end_time - self.start_time)*1000:.2f}ms.")
+            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
             self.document_changed.emit()
         else:
-            logger.debug(f"Compiled {self.fin} with error in {(self.end_time - self.start_time)*1000:.2f}ms.")
+            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t*1000)
 
     @QtCore.Slot()
     def check_recompilation(self):
@@ -215,7 +216,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             self.start_time = time.time()
             self.process.start()
         else:
-            logging.warning("Attempted to start the compiler but it is already running.")
+            logger.warning("Attempted to start the compiler but it is already running.")
 
     @QtCore.Slot()
     def stop(self):
@@ -237,12 +238,12 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             self.current_stderr = None
             self.process = None
         else:
-            logging.warning("Attempted to stop the compiler but it is not running.")
+            logger.warning("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
     def compiler_terminated(self, exitcode):
         """Cleanup if the compiler stops unexpectedly."""
-        logger.debug(f"Compiler stopped with exit code {exitcode}.")
+        logger.debug("Compiler stopped with exit code {}.", exitcode)
         self.stopped.emit()
 
         self.current_stdout = None
@@ -258,14 +259,15 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
         if text_compiled_erroniously in stderr:
             self.end_time = time.time()
-            logger.debug(f"Compiled {self.fin} with error in {(self.end_time - self.start_time)*1000:.2f}ms.")
+            Δ_t = (self.end_time - self.start_time)
+            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t*1000)
             self.compilation_finished.emit()
 
         if text_compiled_successfully in stderr:
             self.end_time = time.time()
             # delta_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
             # logger.debug(f"Compiled {self.fin} successfully in {(delta_t):.2f}ms.")
-            logger.debug(f"Compiled {self.fin} successfully in {(self.end_time - self.start_time)*1000:.2f}ms.")
+            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
             self.document_changed.emit()
             self.compilation_finished.emit()
 
@@ -301,16 +303,16 @@ class WrappedCompilerConnector(QtCore.QObject):
             case enums.compiler_mode.on_demand:
                 self.CompilerConnector = CompilerConnector_FS_onDemand(fin, fout)
                 self.connect_signals()
-                logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
+                logger.debug("Created a new compiler with compiler mode {}.", compiler_mode)
             case enums.compiler_mode.live:
                 self.CompilerConnector = CompilerConnector_FS_live(fin, fout)
                 self.connect_signals()
-                logging.debug(f"Created a new compiler with compiler mode {compiler_mode}.")
+                logger.debug("Created a new compiler with compiler mode {}.", compiler_mode)
             case _:
                 #Use CompilerConnector_FS as a dummy which just ignores all start or compile commands
                 self.CompilerConnector = CompilerConnector_FS(fin, fout)
                 self.connect_signals()
-                logging.warning(f"Attempted to create a new compiler but {compiler_mode} is not a valid compiler mode.")
+                logger.warning("Attempted to create a new compiler but {} is not a valid compiler mode.", compiler_mode)
 
     def switch_compiler(self, compiler_mode):
         """Switch to a new compiler while keeping fin and fout."""

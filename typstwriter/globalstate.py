@@ -2,7 +2,7 @@ from qtpy import QtCore
 
 from typstwriter import enums
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 
 logger = logging.getLogger(__name__)

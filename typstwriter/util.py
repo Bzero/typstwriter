@@ -7,7 +7,7 @@ import os
 import platform
 import subprocess
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 
@@ -105,7 +105,7 @@ class RecentFiles(QtCore.QObject):
                 for line in f:
                     self.recent_files.append(line.strip())
         except OSError:
-            logger.info(f"Could not read file {self.path}.")
+            logger.info("Could not read file {!r}.", self.path)
 
     def write(self):
         """Write the list of recently used files to disk."""
@@ -114,7 +114,7 @@ class RecentFiles(QtCore.QObject):
                 for line in self.recent_files:
                     f.write(line + "\n")
         except OSError:
-            logger.info(f"Could not write file {self.path}.")
+            logger.info("Could not write file {!r}.", self.path)
 
 
 def open_with_external_program(path):
@@ -128,9 +128,9 @@ def open_with_external_program(path):
             case "Darwin":
                 subprocess.call(["open", path])
             case _:
-                logger.error(f"Unsupported system : {platform.system()}.")
+                logger.error("Unsupported system : {}.", platform.system())
     else:
-        logger.warning(f"Attempted to open file with external program but {path} is not a valid path.")
+        logger.warning("Attempted to open file with external program but {!r} is not a valid path.", path)
 
 
 def pdf_path(typst_path):

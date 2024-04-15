@@ -1,7 +1,7 @@
 from qtpy import QtCore
 from qtpy import QtWidgets
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 

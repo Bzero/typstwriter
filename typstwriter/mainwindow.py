@@ -12,7 +12,7 @@ from typstwriter import compiler_tools
 from typstwriter import compiler
 from typstwriter import util
 
-import logging
+from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 

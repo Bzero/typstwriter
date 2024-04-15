@@ -1,7 +1,7 @@
 import os
 import configparser
 
-import logging
+from typstwriter import logging
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class ConfigManager:
             if usedfile:
                 self.writepath = usedfile[-1]
             else:
-                logger.warning(f"No valid config file found in {paths}")
+                logger.warning("No valid config file found in {!r}", paths)
 
     def get(self, section, key, typ="str"):
         """Get config value."""
@@ -58,7 +58,7 @@ class ConfigManager:
             case "str" | "string":
                 return self.config.get(section, key)
             case _:
-                logger.error(f"Unknown type '{str(typ)}'")
+                logger.error("Unknown type {!r}", typ)
                 return None
 
     def set(self, section, key, value):
@@ -73,7 +73,7 @@ class ConfigManager:
         if paths:
             usedfile = self.config.read(paths)
             if not usedfile:
-                logger.warning(f"No valid config file found in {paths}")
+                logger.warning("No valid config file found in {!r}", paths)
         else:
             logger.warning("No file to read from was specified.")
 

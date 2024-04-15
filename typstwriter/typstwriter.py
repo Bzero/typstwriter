@@ -1,31 +1,17 @@
 import sys
 import signal
 import os
-import logging
 
 
 os.environ["QT_API"] = "pyside6"
 import qtpy  # noqa: E402
 
 
-def setup_logger(level):
-    """Set the main logger up."""
-    fmt = "{levelname:8} {asctime:30} {filename:20} {funcName:20} line {lineno:<4d}: {message}"
-    formatter = logging.Formatter(fmt=fmt, style="{")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    log = logging.root
-    log.addHandler(handler)
-    if level in ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]:
-        log.setLevel(level)
-    else:
-        log.setLevel("INFO")
-
-
 def main():
     """Run Typstwriter."""
-    setup_logger(os.environ.get("LOGLEVEL"))
+    # Initialise logging
+    from typstwriter import logging
+    logging.setup_logger(os.environ.get("LOGLEVEL"))
     logger = logging.getLogger(__name__)
 
     logger.info("Typstwriter started")
