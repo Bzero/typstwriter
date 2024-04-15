@@ -295,10 +295,7 @@ class EditorPage(QtWidgets.QFrame):
     def tryclose(self):
         """Try closing the page. Succeeds if file is or can be saved or is discarded, fails otherwise."""
         if not self.issaved:
-            if self.path:
-                name = os.path.basename(self.path)
-            else:
-                name = "*new*"
+            name = os.path.basename(self.path) if self.path else "*new*"
 
             box = QtWidgets.QMessageBox()
             box.setWindowTitle("Closing Document")
@@ -347,7 +344,7 @@ class WelcomePage(QtWidgets.QFrame):
 
     open_file = QtCore.Signal(str)
 
-    def __init__(self, recent_files=[]):
+    def __init__(self, recent_files=None):
         """Populate welcome page."""
         QtWidgets.QFrame.__init__(self)
         self.setFrameStyle(QtWidgets.QFrame.Shape.StyledPanel)
@@ -361,7 +358,7 @@ class WelcomePage(QtWidgets.QFrame):
         self.button_OpenFile = QtWidgets.QPushButton("Open File")
         self.button_OpenFolder = QtWidgets.QPushButton("Open Workspace")
 
-        self.recentFilesModel = util.RecentFilesModel(recent_files)
+        self.recentFilesModel = util.RecentFilesModel(recent_files or [])
 
         self.listView = QtWidgets.QListView()
         self.listView.setViewMode(QtWidgets.QListView.ViewMode.ListMode)

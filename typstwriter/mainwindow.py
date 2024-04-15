@@ -11,7 +11,6 @@ from typstwriter import fs_explorer
 from typstwriter import compiler_tools
 from typstwriter import compiler
 from typstwriter import util
-from typstwriter import enums
 
 import logging
 from typstwriter import configuration

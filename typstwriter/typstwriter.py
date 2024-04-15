@@ -25,7 +25,7 @@ def setup_logger(level):
 
 def main():
     """Run Typstwriter."""
-    setup_logger(os.environ.get('LOGLEVEL'))
+    setup_logger(os.environ.get("LOGLEVEL"))
     logger = logging.getLogger(__name__)
 
     logger.info("Typstwriter started")

@@ -27,7 +27,7 @@ class TestFileIconProvider:
 class TestRecentFilesModel:
     """Test util.RecentFilesModel."""
 
-    file_list = ["a.txt", "b.typ", "c.py"]
+    file_list = ["a.txt", "b.typ", "c.py"] # noqa RUF012
 
     def test_data_data(self):
         """Make sure correct data is returned."""
@@ -38,7 +38,7 @@ class TestRecentFilesModel:
     def test_data_icon(self):
         """Make sure an icon is returned."""
         model = util.RecentFilesModel(self.file_list)
-        for i, f in enumerate(self.file_list):
+        for i, _ in enumerate(self.file_list):
             assert isinstance(model.data(model.createIndex(i, 0, None), QtCore.Qt.DecorationRole), QtGui.QIcon)
 
     def test_rowCount(self):

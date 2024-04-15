@@ -45,12 +45,15 @@ indent-width = 4
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "N", "D", "Q", "PTH", "PL", "R", "C", "B", "C4", "G", "PT", "RET", "RUF", "SIM", "UP"]
-ignore = ["D212", "D203", "D400", "RET505", "D100", "PLR0915", "RET504"]
+ignore = ["D212", "D203", "D400", "RET505", "D100", "PLR0915", "RET504", "PLE1205", "UP015"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["N802"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

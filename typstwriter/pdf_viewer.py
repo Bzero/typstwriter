@@ -94,13 +94,13 @@ class PDFViewer(QtWidgets.QFrame):
         self.actionZoom_In = QtGui.QAction(self)
         self.actionZoom_In.setIcon(QtGui.QIcon(util.icon_path("plus.svg")))
         self.actionZoom_In.setText("Zoom In")
-        self.actionZoom_In.setShortcut(u"Ctrl++")
+        self.actionZoom_In.setShortcut("Ctrl++")
 
         # Action Zoom Out
         self.actionZoom_Out = QtGui.QAction(self)
         self.actionZoom_Out.setIcon(QtGui.QIcon(util.icon_path("minus.svg")))
         self.actionZoom_Out.setText("Zoom Out")
-        self.actionZoom_Out.setShortcut(u"Ctrl+-")
+        self.actionZoom_Out.setShortcut("Ctrl+-")
 
         # Action Previous Page
         self.actionPrevious_Page = QtGui.QAction(self)
@@ -111,13 +111,13 @@ class PDFViewer(QtWidgets.QFrame):
         self.actionNext_Page = QtGui.QAction(self)
         self.actionNext_Page.setIcon(QtGui.QIcon(util.icon_path("rarrow.svg")))
         self.actionNext_Page.setText("Next Page")
-        self.actionPrevious_Page.setShortcut(u"PgUp")
+        self.actionPrevious_Page.setShortcut("PgUp")
 
         # Action External Viewer
         self.actionOpen_External = QtGui.QAction(self)
         self.actionOpen_External.setIcon(QtGui.QIcon(util.icon_path("pdf.svg")))
         self.actionOpen_External.setText("External Viewer")
-        self.actionNext_Page.setShortcut(u"PgDown")
+        self.actionNext_Page.setShortcut("PgDown")
 
         # Layout
         self.verticalLayout = QtWidgets.QVBoxLayout(self)

@@ -21,7 +21,7 @@ class FileIconProvider(QtWidgets.QFileIconProvider):
 
     def icon(self, info):
         """Return icon associated with info."""
-        if isinstance(info, QtCore.QFileInfo):
+        if isinstance(info, QtCore.QFileInfo): # noqa SIM102
             if info.suffix() == "typ":
                 return QtGui.QIcon(icon_path("typst.png"))
         return super().icon(info)
@@ -159,7 +159,7 @@ class TogglingAction(QtWidgets.QAction):
         self.text_off = ""
         self.toggled.connect(self.handle_toggled)
 
-    def setText(self, text, state=None):
+    def setText(self, text, state=None): # noqa N802
         """Extend parent setText with state information."""
         if state == QtGui.QIcon.State.On or state is None:
             self.text_on = text

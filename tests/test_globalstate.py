@@ -30,7 +30,6 @@ class TestGloalState:
 
     def test_members(self, qtbot):
         """Test if all required members are present."""
-
         state = globalstate.GlobalState()
 
         assert hasattr(state, "working_directory")

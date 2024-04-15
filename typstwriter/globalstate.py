@@ -31,7 +31,7 @@ class SingleState(QtCore.QObject):
             raise AttributeError("The only vlaid attributes are 'Value' and 'Signal'.")
 
 
-class GlobalState():
+class GlobalState:
     """Stores and initializes a collection of SingleStates."""
 
     def __init__(self):
