@@ -117,12 +117,21 @@ class CompilerOutput(QtWidgets.QWidget):
 
     def insert_block(self, text=None):
         """Insert a new block of text."""
-        if not self.OutputDisplay.document().isEmpty():
+        self.insert_text(new_block=True, text=text)
+
+    def append_to_block(self, text):
+        """Append to the current block of text."""
+        self.insert_text(new_block=False, text=text)
+
+    def insert_text(self, new_block=False, text=None):
+        """Insert text."""
+        bottom_scrolled = self.OutputDisplay.verticalScrollBar().value() == self.OutputDisplay.verticalScrollBar().maximum()
+
+        if new_block and not self.OutputDisplay.document().isEmpty():
             self.OutputDisplay.insertHtml("<p/><hr/><p/>")
 
         if text:
             self.OutputDisplay.insertPlainText(text)
 
-    def append_to_block(self, text):
-        """Append to the current block of text."""
-        self.OutputDisplay.insertPlainText(text)
+        if bottom_scrolled:
+            self.OutputDisplay.verticalScrollBar().setValue(self.OutputDisplay.verticalScrollBar().maximum())
