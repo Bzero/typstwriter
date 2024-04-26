@@ -265,8 +265,8 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
         if text_compiled_successfully in stderr:
             self.end_time = time.time()
-            # delta_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
-            # logger.debug(f"Compiled {self.fin} successfully in {(delta_t):.2f}ms.")
+            # Δ_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
+            Δ_t = (self.end_time - self.start_time)
             logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
             self.document_changed.emit()
             self.compilation_finished.emit()
