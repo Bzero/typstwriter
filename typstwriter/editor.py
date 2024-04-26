@@ -19,6 +19,7 @@ state = globalstate.State
 
 line_number_color = QtGui.QColor(0, 0, 100)
 line_number_background_color = QtGui.QColor(240, 240, 255)
+highlight_color = QtGui.QColor(180, 200, 235)
 
 
 class Editor(QtWidgets.QFrame):
@@ -231,6 +232,9 @@ class EditorPage(QtWidgets.QFrame):
         self.edit.updateRequest.connect(self.line_numbers.update_requested)
         self.line_numbers.update_width()
 
+        self.edit.cursorPositionChanged.connect(self.highlight_current_line)
+        self.highlight_current_line()
+
         highlight_style = config.get("Editor", "highlighter-style")
         self.highlighter = superqt.utils.CodeSyntaxHighlight(self.edit.document(), "typst", highlight_style)
 
@@ -357,6 +361,18 @@ class EditorPage(QtWidgets.QFrame):
             n_rect = QtCore.QRect(c_rect.left(), c_rect.top(), width, c_rect.height())
             self.line_numbers.setGeometry(n_rect)
 
+    @QtCore.Slot()
+    def highlight_current_line(self):
+        """Highlight the current line, unless some text is selected."""
+        if not self.edit.textCursor().hasSelection():
+            highlight = QtWidgets.QTextEdit.ExtraSelection()
+            highlight.format.setBackground(highlight_color)
+            highlight.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+            highlight.cursor = self.edit.textCursor()
+            self.edit.setExtraSelections([highlight])
+        else:
+            self.edit.setExtraSelections([])
+
 
 class WelcomePage(QtWidgets.QFrame):
     """Welcome Page."""
@@ -417,7 +433,6 @@ class WelcomePage(QtWidgets.QFrame):
     def tryclose(self):
         """Close page."""
         return True
-
 
 
 class LineNumberWidget(QtWidgets.QWidget):
