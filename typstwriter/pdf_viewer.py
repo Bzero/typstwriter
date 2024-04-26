@@ -192,11 +192,9 @@ class PDFViewer(QtWidgets.QFrame):
     @QtCore.Slot(QtCore.QUrl)
     def open(self, path):
         """Open and display a file."""
+        self.docpath = path
         if os.path.exists(path):
             self.m_document.load(path)
-            self.docpath = path
-            document_title = self.m_document.metaData(QtPdf.QPdfDocument.MetaDataField.Title)
-            self.setWindowTitle(document_title if document_title else "PDF Viewer")
             self.page_selected(0)
             self.m_pageSelector.setMaximum(self.m_document.pageCount())
             self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
@@ -207,22 +205,25 @@ class PDFViewer(QtWidgets.QFrame):
     @QtCore.Slot()
     def reload(self):
         """Reload file."""
-        # get current scroll position
-        pos = self.pdfView.verticalScrollBar().value()
+        if self.docpath and os.path.exists(self.docpath):
+            # get current scroll position
+            pos = self.pdfView.verticalScrollBar().value()
 
-        # reload
-        t1 = time()
-        self.m_document.load(self.docpath)
-        t2 = time()
+            # reload
+            t1 = time()
+            self.m_document.load(self.docpath)
+            t2 = time()
 
-        # update pages
-        self.m_pageSelector.setMaximum(self.m_document.pageCount())
-        self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
+            # update pages
+            self.m_pageSelector.setMaximum(self.m_document.pageCount())
+            self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
 
-        # scroll back to same point
-        self.pdfView.verticalScrollBar().setValue(pos)
+            # scroll back to same point
+            self.pdfView.verticalScrollBar().setValue(pos)
 
-        logger.debug("Reloaded from disk in {:.2f}ms.", (t2-t1)*1000)
+            logger.debug("Reloaded from disk in {:.2f}ms.", (t2-t1)*1000)
+        else:
+            logger.debug("Attempted to reload PDF but no valid file found at {!r}.", self.docpath)
 
     @QtCore.Slot(int)
     def page_selected(self, page):
