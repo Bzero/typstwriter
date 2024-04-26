@@ -17,6 +17,10 @@ config = configuration.Config
 state = globalstate.State
 
 
+line_number_color = QtGui.QColor(0, 0, 100)
+line_number_background_color = QtGui.QColor(240, 240, 255)
+
+
 class Editor(QtWidgets.QFrame):
     """A tabbed text editor."""
 
@@ -222,6 +226,11 @@ class EditorPage(QtWidgets.QFrame):
         self.edit = QtWidgets.QPlainTextEdit()
         self.verticalLayout.addWidget(self.edit)
 
+        self.line_numbers = LineNumberWidget(self.edit)
+        self.edit.blockCountChanged.connect(self.line_numbers.update_width)
+        self.edit.updateRequest.connect(self.line_numbers.update_requested)
+        self.line_numbers.update_width()
+
         highlight_style = config.get("Editor", "highlighter-style")
         self.highlighter = superqt.utils.CodeSyntaxHighlight(self.edit.document(), "typst", highlight_style)
 
@@ -338,6 +347,16 @@ class EditorPage(QtWidgets.QFrame):
 
         self.verticalLayout.addLayout(self.gridLayout)
 
+    def resizeEvent(self, *e):
+        """Resize."""
+        super().resizeEvent(*e)
+
+        if self.line_numbers:
+            c_rect = self.contentsRect()
+            width = self.line_numbers.width()
+            n_rect = QtCore.QRect(c_rect.left(), c_rect.top(), width, c_rect.height())
+            self.line_numbers.setGeometry(n_rect)
+
 
 class WelcomePage(QtWidgets.QFrame):
     """Welcome Page."""
@@ -398,3 +417,57 @@ class WelcomePage(QtWidgets.QFrame):
     def tryclose(self):
         """Close page."""
         return True
+
+
+
+class LineNumberWidget(QtWidgets.QWidget):
+    """A widget supposed to be attached to a QPlainTextEdit showing line numbers."""
+
+    left_spacing = 10
+    right_spacing = 10
+
+    def __init__(self, parent):
+        """Init."""
+        QtWidgets.QWidget.__init__(self, parent)
+
+    def paintEvent(self, event):
+        """Paint the widget."""
+        painter = QtGui.QPainter(self)
+
+        # paint background
+        painter.fillRect(event.rect(), line_number_background_color)
+
+        # paint line numbers
+        painter.setPen(line_number_color)
+        block = self.parentWidget().firstVisibleBlock()
+
+        while block and block.isValid():
+            offset = self.parentWidget().contentOffset()
+            y = int(self.parentWidget().blockBoundingGeometry(block).translated(offset).top())
+            line_number = str(block.blockNumber() + 1)
+            text_width = self.width() - self.right_spacing
+            text_height = self.fontMetrics().height()
+            painter.drawText(0, y, text_width, text_height, QtCore.Qt.AlignRight, line_number)
+
+            if y <= event.rect().bottom():
+                block = block.next()
+            else:
+                block = None
+
+        painter.end()
+
+    @QtCore.Slot(QtCore.QRect, int)
+    def update_requested(self, rect, dy):
+        """Update."""
+        if dy:
+            self.scroll(0, dy)
+        else:
+            self.update(0, rect.y(), self.width(), rect.height())
+
+    @QtCore.Slot()
+    def update_width(self):
+        """Update the Line Number Widget to take the width required to display all digits."""
+        text_width = self.fontMetrics().horizontalAdvance(str(self.parentWidget().blockCount()))
+        width = self.left_spacing + text_width + self.right_spacing
+        self.setFixedWidth(width)
+        self.parentWidget().setViewportMargins(width, 0, 0, 0)
