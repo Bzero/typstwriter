@@ -219,7 +219,11 @@ class EditorPage(QtWidgets.QFrame):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(0)
 
-        self.edit = CodeEdit()
+        syntax_conf = config.get("Editor", "highlight_syntax", "bool")
+        line_numbers_conf = config.get("Editor", "show_line_numbers", "bool")
+        line_conf = config.get("Editor", "highlight_line", "bool")
+
+        self.edit = CodeEdit(highlight_synatx=syntax_conf, show_line_numbers=line_numbers_conf, highlight_line=line_conf)
         self.verticalLayout.addWidget(self.edit)
 
         self.edit.textChanged.connect(self.modified)
