@@ -145,7 +145,7 @@ class TogglingAction(QtWidgets.QAction):
     A QAction that can be toggled.
 
     It automatically changes text and icon when being toggled.
-    Toggling cuuses the activated/deactivated signals being emitted.
+    User triggering causes the activated/deactivated signals being emitted.
     """
 
     activated = QtCore.Signal()
@@ -157,7 +157,8 @@ class TogglingAction(QtWidgets.QAction):
         self.setCheckable(True)
         self.text_on = ""
         self.text_off = ""
-        self.toggled.connect(self.handle_toggled)
+        self.toggled.connect(self.update_text)  # User or progammatic interaction
+        self.triggered.connect(self.handle_triggered)  # User interaction
 
     def setText(self, text, state=None): # noqa N802
         """Extend parent setText with state information."""
@@ -174,7 +175,7 @@ class TogglingAction(QtWidgets.QAction):
         else:
             super().setText(self.text_off)
 
-    def handle_toggled(self, checked):
+    def handle_triggered(self, checked):
         """Handle toggling."""
         self.update_text()
         if checked:
