@@ -120,24 +120,34 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
     @QtCore.Slot()
     def start(self):
         """Start the compiler."""
-        if self.process is None:
-            self.process = QtCore.QProcess()
-            self.process.setProgram(self.compiler)
-            self.process.setArguments([self.subcommand, self.fin, self.fout])
-            self.process.finished.connect(self.process_finished)
-            self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
-            self.process.readyReadStandardError.connect(self.handle_ready_stderr)
+        self.started.emit()
 
-            self.current_stdout = ""
-            self.current_stderr = ""
-
-            logger.debug("Compilation started.")
-            self.started.emit()
-            self.compilation_started.emit()
-            self.start_time = time.time()
-            self.process.start()
-        else:
+        # Check if compiler is alredy running
+        if self.process is not None:
             self.recompile_scheduled = True
+            return
+
+        # Check if fin and fout are present
+        if self.fin is None or self.fout is None:
+            logger.warning("Attempted to start the compiler but input or output file is missing.")
+            self.stopped.emit()
+            return
+
+        # Create process
+        self.process = QtCore.QProcess()
+        self.process.setProgram(self.compiler)
+        self.process.setArguments([self.subcommand, self.fin, self.fout])
+        self.process.finished.connect(self.process_finished)
+        self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
+        self.process.readyReadStandardError.connect(self.handle_ready_stderr)
+
+        self.current_stdout = ""
+        self.current_stderr = ""
+
+        logger.debug("Compilation started.")
+        self.compilation_started.emit()
+        self.start_time = time.time()
+        self.process.start()
 
     @QtCore.Slot()
     def stop(self):
@@ -155,7 +165,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.recompile_scheduled = False
             self.process_finished(-1)
         else:
-            logger.warning("Attempted to stop the compiler but it is not running.")
+            logger.debug("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
     def process_finished(self, exitcode):
@@ -200,23 +210,33 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
     @QtCore.Slot()
     def start(self):
         """Start the compiler."""
-        if self.process is None:
-            self.process = QtCore.QProcess()
-            self.process.setProgram(self.compiler)
-            self.process.setArguments([self.subcommand, self.fin, self.fout])
-            self.process.finished.connect(self.compiler_terminated)
-            self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
-            self.process.readyReadStandardError.connect(self.handle_ready_stderr)
+        self.started.emit()
 
-            self.current_stdout = ""
-            self.current_stderr = ""
-
-            logger.debug("Compiler started.")
-            self.started.emit()
-            self.start_time = time.time()
-            self.process.start()
-        else:
+        # Check if compiler is alredy running
+        if self.process is not None:
             logger.warning("Attempted to start the compiler but it is already running.")
+            return
+
+        # Check if fin and fout are present
+        if self.fin is None or self.fout is None:
+            logger.warning("Attempted to start the compiler but input or output file is missing.")
+            self.stopped.emit()
+            return
+
+        # Create process
+        self.process = QtCore.QProcess()
+        self.process.setProgram(self.compiler)
+        self.process.setArguments([self.subcommand, self.fin, self.fout])
+        self.process.finished.connect(self.compiler_terminated)
+        self.process.readyReadStandardOutput.connect(self.handle_ready_stdout)
+        self.process.readyReadStandardError.connect(self.handle_ready_stderr)
+
+        self.current_stdout = ""
+        self.current_stderr = ""
+
+        logger.debug("Compiler started.")
+        self.start_time = time.time()
+        self.process.start()
 
     @QtCore.Slot()
     def stop(self):
@@ -238,7 +258,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             self.current_stderr = None
             self.process = None
         else:
-            logger.warning("Attempted to stop the compiler but it is not running.")
+            logger.debug("Attempted to stop the compiler but it is not running.")
 
     @QtCore.Slot(int)
     def compiler_terminated(self, exitcode):
