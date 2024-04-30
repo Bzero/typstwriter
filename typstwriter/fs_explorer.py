@@ -4,6 +4,8 @@ from qtpy import QtWidgets
 
 import os
 
+import send2trash
+
 from typstwriter import util
 
 from typstwriter import logging
@@ -286,7 +288,7 @@ class FSExplorer(QtWidgets.QWidget):
         """Delete a folder or file."""
         msg = QtWidgets.QMessageBox.question(self, "Typstwriter", f"Should '{path}' be deleted?")
         if msg == QtWidgets.QMessageBox.StandardButton.Yes:
-            if os.path.isfile(path):
-                os.remove(path)
-            elif os.path.isdir(path):
-                os.rmdir(path)
+            try:
+                send2trash.send2trash(path)
+            except send2trash.TrashPermissionError:
+                logger.warning("Could not move {!r} to trash.")

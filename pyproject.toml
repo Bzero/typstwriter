@@ -19,7 +19,8 @@ classifiers = [
 dependencies = [
 "qtpy >= 2.3",
 "pygments >= 2.18",
-"superqt >= 0.3.3"
+"superqt >= 0.3.3",
+"send2trash >= 1.8.0"
 ]
 dynamic = ["version"]
 
