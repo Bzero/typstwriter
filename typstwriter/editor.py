@@ -147,6 +147,12 @@ class Editor(QtWidgets.QFrame):
         return True
 
     @QtCore.Slot()
+    def save_all(self):
+        for t in self.tabs_list():
+            if isinstance(t, EditorPage):
+                t.save()
+
+    @QtCore.Slot()
     def copy(self):
         """Cut selection of active tab."""
         page = self.TabWidget.currentWidget()
