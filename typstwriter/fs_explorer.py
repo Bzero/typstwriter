@@ -167,7 +167,10 @@ class FSExplorer(QtWidgets.QWidget):
         self.FolderContextMenu = FolderContextMenu(self)
 
         # Set initial state
-        self.set_root(QtCore.QDir.homePath())
+        root_dir = os.path.expanduser(config.get("General", "WorkingDirectory"))
+        if not os.path.exists(root_dir):
+            root_dir = os.path.expanduser("~/")
+        self.set_root(root_dir)
 
     def open_directory_dialog(self):
         """Open a dialog to select root path and open said path."""

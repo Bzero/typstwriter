@@ -14,7 +14,7 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 os.path.expanduser("~/.typstwriter.ini"),
                 "./typstwriter.ini"]
 
-default_config = {"General": {"WorkingDirectory": ""},
+default_config = {"General": {"WorkingDirectory": "~/"},
                   "Compiler": {"Name": "typst",
                                "Mode": "on_demand"},
                   "Editor": {"saveatrun": True,
