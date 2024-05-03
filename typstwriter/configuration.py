@@ -21,7 +21,8 @@ default_config = {"General": {"WorkingDirectory": ""},
                              "highlighter-style": "sas",  # Can be any style from https://pygments.org/styles/
                              "highlight_syntax": True,
                              "show_line_numbers": True,
-                             "highlight_line": True},
+                             "highlight_line": True,
+                             "use_spaces": True},
                   "Internals": {"recentFilesPath": "~/.config/typstwriter/recentFiles.txt",
                                 "recentFilesLength": 16}}
 
