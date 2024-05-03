@@ -219,7 +219,15 @@ class EditorPage(QtWidgets.QFrame):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(0)
 
-        self.edit = CodeEdit()
+        syntax_conf = config.get("Editor", "highlight_syntax", "bool")
+        line_numbers_conf = config.get("Editor", "show_line_numbers", "bool")
+        line_conf = config.get("Editor", "highlight_line", "bool")
+        use_spaces = config.get("Editor", "use_spaces", "bool")
+
+        self.edit = CodeEdit(highlight_synatx=syntax_conf,
+                             show_line_numbers=line_numbers_conf,
+                             highlight_line=line_conf,
+                             use_spaces=use_spaces)
         self.verticalLayout.addWidget(self.edit)
 
         self.edit.textChanged.connect(self.modified)
@@ -396,7 +404,7 @@ class WelcomePage(QtWidgets.QFrame):
 class CodeEdit(QtWidgets.QPlainTextEdit):
     """A code editor widget."""
 
-    def __init__(self, highlight_synatx=True, show_line_numbers=True, highlight_line=True):
+    def __init__(self, highlight_synatx=True, show_line_numbers=True, highlight_line=True, use_spaces=True):
         """Init and set options."""
         super().__init__()
 
@@ -419,6 +427,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.cursorPositionChanged.connect(self.highlight_current_line)
             self.highlight_current_line()
 
+        self.use_spaces = use_spaces
+
     def resizeEvent(self, *e):
         """Resize."""
         super().resizeEvent(*e)
@@ -428,6 +438,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             width = self.line_numbers.width()
             rect = QtCore.QRect(cr.left(), cr.top(), width, cr.height())
             self.line_numbers.setGeometry(rect)
+
+    def keyPressEvent(self, e):
+        """Intercept, modify and forward keyPressEvent."""
+        # Replace tabs with spaces
+        if self.use_spaces:
+            if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
+                e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
+
+        super().keyPressEvent(e)
 
     @QtCore.Slot()
     def highlight_current_line(self):
