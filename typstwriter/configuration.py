@@ -14,17 +14,17 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 os.path.expanduser("~/.typstwriter.ini"),
                 "./typstwriter.ini"]
 
-default_config = {"General": {"WorkingDirectory": "~/"},
-                  "Compiler": {"Name": "typst",
-                               "Mode": "on_demand"},
-                  "Editor": {"saveatrun": True,
-                             "highlighter-style": "sas",  # Can be any style from https://pygments.org/styles/
+default_config = {"General": {"working_directory": "~/"},
+                  "Compiler": {"name": "typst",
+                               "mode": "on_demand"},
+                  "Editor": {"save_at_run": False,
+                             "highlighter_style": "sas",  # Can be any style from https://pygments.org/styles/
                              "highlight_syntax": True,
                              "show_line_numbers": True,
                              "highlight_line": True,
                              "use_spaces": True},
-                  "Internals": {"recentFilesPath": "~/.config/typstwriter/recentFiles.txt",
-                                "recentFilesLength": 16}}
+                  "Internals": {"recent_files_path": "~/.config/typstwriter/recentFiles.txt",
+                                "recent_files_length": 16}}
 
 
 class ConfigManager:

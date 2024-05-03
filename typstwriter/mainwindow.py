@@ -121,7 +121,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_fs_explorer.setChecked(True)
         self.actions.show_compiler_options.setChecked(True)
         self.actions.show_compiler_output.setChecked(True)
-        if config.get("Editor", "saveatrun", "bool"):
+        if config.get("Editor", "save_at_run", "bool"):
             self.actions.run.activated.connect(self.editor.save_all)
         self.actions.run.activated.connect(self.CompilerConnector.start)
         self.actions.run.deactivated.connect(self.CompilerConnector.stop)

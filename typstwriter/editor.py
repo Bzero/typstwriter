@@ -415,7 +415,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().__init__()
 
         if highlight_synatx:
-            highlight_style = config.get("Editor", "highlighter-style")
+            highlight_style = config.get("Editor", "highlighter_style")
             self.highlighter = superqt.utils.CodeSyntaxHighlight(self.document(), "typst", highlight_style)
             palette = self.palette()
             palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))

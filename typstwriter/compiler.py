@@ -53,7 +53,7 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
         """Init."""
         super().__init__()
 
-        self.compiler = config.get("Compiler", "Name")
+        self.compiler = config.get("Compiler", "name")
 
         self.fin = fin
         self.fout = fout

@@ -167,7 +167,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.FolderContextMenu = FolderContextMenu(self)
 
         # Set initial state
-        root_dir = os.path.expanduser(config.get("General", "WorkingDirectory"))
+        root_dir = os.path.expanduser(config.get("General", "working_directory"))
         if not os.path.exists(root_dir):
             root_dir = os.path.expanduser("~/")
         self.set_root(root_dir)

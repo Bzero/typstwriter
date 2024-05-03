@@ -69,11 +69,11 @@ class RecentFiles(QtCore.QObject):
         """
         QtCore.QObject.__init__(self)
 
-        maxlen = config.get("Internals", "recentFilesLength", "int")
+        maxlen = config.get("Internals", "recent_files_length", "int")
         self.recent_files = collections.deque(maxlen=maxlen)
 
         if not path:
-            path = config.get("Internals", "recentFilesPath")
+            path = config.get("Internals", "recent_files_path")
 
         self.path = os.path.expanduser(path)
         self.read()

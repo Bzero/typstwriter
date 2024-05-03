@@ -36,10 +36,10 @@ class GlobalState:
 
     def __init__(self):
         """Initiate members according to config."""
-        self.working_directory = SingleState(config.get("General", "WorkingDirectory"))
+        self.working_directory = SingleState(config.get("General", "working_directory"))
         self.compiler_running = SingleState(False)
         self.main_file = SingleState(None)
-        self.compiler_mode = SingleState(enums.compiler_mode[config.get("Compiler", "Mode")])
+        self.compiler_mode = SingleState(enums.compiler_mode[config.get("Compiler", "mode")])
 
 
 # Instantiate the State singleton
