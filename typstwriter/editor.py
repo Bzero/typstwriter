@@ -452,6 +452,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
                 e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
 
+        # Avoid inserting line break characters
+        if e.key() == QtCore.Qt.Key_Return and e.modifiers() == QtCore.Qt.ShiftModifier:
+            e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier, "\r")
+
         super().keyPressEvent(e)
 
     @QtCore.Slot()
