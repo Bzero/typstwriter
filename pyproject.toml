@@ -20,7 +20,8 @@ dependencies = [
 "qtpy >= 2.3",
 "pygments >= 2.18",
 "superqt >= 0.3.3",
-"send2trash >= 1.8.0"
+"send2trash >= 1.8.0",
+"pyside6 >= 6.4.0"
 ]
 dynamic = ["version"]
 
