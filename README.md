@@ -26,6 +26,14 @@ Files further down in the list will take precedence.
 
 ## Installation
 
+### Using pip:
+
+Typstwriter is available on [PyPI](https://pypi.org/project/typstwriter/). To install using `pip` simply use:
+
+```
+pip install typstwriter
+```
+
 ### From source
 
 Get the source code by cloning the desired branch or download a release from th github repository and install from the toplevel directory:
