@@ -85,7 +85,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerOptionsdock = QtWidgets.QDockWidget("Compiler Options", self)
         self.CompilerOptionsdock.setWidget(self.CompilerOptions)
         self.CompilerOptionsdock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable)
-        self.CompilerOptionsdock.setAllowedAreas(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
+        self.CompilerOptionsdock.setAllowedAreas(
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOptionsdock)
 
         # Compiler Output
@@ -93,7 +94,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerOutputdock = QtWidgets.QDockWidget("Compiler Output", self)
         self.CompilerOutputdock.setWidget(self.CompilerOutput)
         self.CompilerOutputdock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable)
-        self.CompilerOutputdock.setAllowedAreas(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
+        self.CompilerOutputdock.setAllowedAreas(
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOutputdock)
 
         # CompilerConnector
@@ -204,7 +206,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def prepare_compilation(self):
         """Set appropriate input and output files before compiling."""
-        if state.main_file.Value is None:
+        if state.main_file.Value is None: # noqa: SIM108
             main = self.editor.TabWidget.currentWidget().path
         else:
             main = state.main_file.Value

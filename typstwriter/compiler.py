@@ -172,7 +172,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
     def process_finished(self, exitcode):
         """Finalize the compilation and trigger apropriate signals."""
         self.end_time = time.time()
-        Δ_t = (self.end_time - self.start_time)
+        Δ_t = (self.end_time - self.start_time) # noqa: N806
 
         self.compilation_finished.emit()
         self.stopped.emit()
@@ -281,14 +281,14 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
         if text_compiled_erroniously in stderr:
             self.end_time = time.time()
-            Δ_t = (self.end_time - self.start_time)
+            Δ_t = (self.end_time - self.start_time) # noqa: N806
             logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t*1000)
             self.compilation_finished.emit()
 
         if text_compiled_successfully in stderr:
             self.end_time = time.time()
             # Δ_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
-            Δ_t = (self.end_time - self.start_time)
+            Δ_t = (self.end_time - self.start_time) # noqa: N806
             logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
             self.document_changed.emit()
             self.compilation_finished.emit()

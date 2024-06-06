@@ -2,7 +2,7 @@
 
 An integrated editor for the [typst](https://github.com/typst/typst) typesetting system.
 
-![Typstwriter](docs/screenshots/overview.png)
+![](docs/screenshots/overview.png)
 
 ## Features
 

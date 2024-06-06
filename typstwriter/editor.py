@@ -148,6 +148,7 @@ class Editor(QtWidgets.QFrame):
 
     @QtCore.Slot()
     def save_all(self):
+        """Save all tabs."""
         for t in self.tabs_list():
             if isinstance(t, EditorPage):
                 t.save()
@@ -435,7 +436,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         self.use_spaces = use_spaces
 
-    def resizeEvent(self, *e):
+    def resizeEvent(self, *e): # noqa: N802 This is an overriding function
         """Resize."""
         super().resizeEvent(*e)
 
@@ -445,12 +446,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             rect = QtCore.QRect(cr.left(), cr.top(), width, cr.height())
             self.line_numbers.setGeometry(rect)
 
-    def keyPressEvent(self, e):
+    def keyPressEvent(self, e): # noqa: N802 This is an overriding function
         """Intercept, modify and forward keyPressEvent."""
         # Replace tabs with spaces
-        if self.use_spaces:
-            if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
-                e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
+        if self.use_spaces and e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
+            e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
 
         # Avoid inserting line break characters
         if e.key() == QtCore.Qt.Key_Return and e.modifiers() == QtCore.Qt.ShiftModifier:
@@ -481,12 +481,13 @@ class LineNumberWidget(QtWidgets.QWidget):
         """Init."""
         QtWidgets.QWidget.__init__(self, parent)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event): # noqa: N802 This is an overriding function
         """Paint the widget."""
         painter = QtGui.QPainter(self)
 
         # paint background
-        painter.fillRect(event.rect(), QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color))
+        painter.fillRect(event.rect(),
+                         QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color))
 
         # paint line numbers
         painter.setPen(QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_color))
@@ -500,7 +501,7 @@ class LineNumberWidget(QtWidgets.QWidget):
             text_height = self.fontMetrics().height()
             painter.drawText(0, y, text_width, text_height, QtCore.Qt.AlignRight, line_number)
 
-            if y <= event.rect().bottom():
+            if y <= event.rect().bottom(): # noqa: SIM108
                 block = block.next()
             else:
                 block = None

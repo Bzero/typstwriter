@@ -274,7 +274,8 @@ class FSExplorer(QtWidgets.QWidget):
     def rename_from(self, path_from):
         """Prompts the user to enter a new name."""
         head_path, tail_path_from = os.path.split(path_from)
-        tail_path_to, ok = QtWidgets.QInputDialog.getText(self, "Typstwriter", "Enter new name:", QtWidgets.QLineEdit.Normal, text=tail_path_from)
+        tail_path_to, ok = QtWidgets.QInputDialog.getText(
+            self, "Typstwriter", "Enter new name:", QtWidgets.QLineEdit.Normal, text=tail_path_from)
         if ok and tail_path_to:
             path_to = os.path.join(head_path, tail_path_to)
             self.rename(path_from, path_to)
