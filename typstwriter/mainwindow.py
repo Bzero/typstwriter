@@ -123,6 +123,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_compiler_output.setChecked(True)
         if config.get("Editor", "save_at_run", "bool"):
             self.actions.run.activated.connect(self.editor.save_all)
+        self.actions.run.activated.connect(self.prepare_compilation)
         self.actions.run.activated.connect(self.CompilerConnector.start)
         self.actions.run.deactivated.connect(self.CompilerConnector.stop)
         self.CompilerConnector.started.connect(lambda: self.actions.run.setChecked(True))
@@ -133,9 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.editor.text_changed.connect(self.CompilerConnector.source_changed)
         self.CompilerConnector.document_changed.connect(self.PDFWidget.reload)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.stop())
-        state.main_file.Signal.connect(lambda s: self.CompilerConnector.set_fin(s))
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
-        state.main_file.Signal.connect(lambda s: self.CompilerConnector.set_fout(util.pdf_path(s)))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
 
@@ -202,4 +201,16 @@ class MainWindow(QtWidgets.QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+    def prepare_compilation(self):
+        """Set appropriate input and output files before compiling."""
+        if state.main_file.Value is None:
+            main = self.editor.TabWidget.currentWidget().path
+        else:
+            main = state.main_file.Value
+
+        if main:
+            self.CompilerConnector.set_fin(main)
+            self.CompilerConnector.set_fout(util.pdf_path(main))
+            self.PDFWidget.open(util.pdf_path(main))
 
