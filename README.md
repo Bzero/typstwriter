@@ -43,6 +43,9 @@ git clone https://github.com/Bzero/typstwriter
 pip install ./typstwriter/
 ```
 
+### Install typst
+Independently of the installation method chosen, the `typst` CLI has to be available to compile typst documents. Consult the [typst repository](https://github.com/typst/typst#installation) for details on installing `typst`. Alternatively, the path of a `typst` executable can be specified in the [configuration file](#Configuration).
+
 ## Development
 
 Clone the repository
