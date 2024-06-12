@@ -28,7 +28,7 @@ class SingleState(QtCore.QObject):
         elif name == "Signal":
             super().__setattr__(name, value)
         else:
-            raise AttributeError("The only vlaid attributes are 'Value' and 'Signal'.")
+            raise AttributeError("The only valid attributes are 'Value' and 'Signal'.")
 
 
 class GlobalState:

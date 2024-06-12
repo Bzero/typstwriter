@@ -21,7 +21,7 @@ class TestSingleState:
     def test_AttributeError(self, qtbot):
         """Make sure other fields trigger AttributeError."""
         state = globalstate.SingleState("")
-        with pytest.raises(AttributeError, match="The only vlaid attributes are 'Value' and 'Signal'."):
+        with pytest.raises(AttributeError, match="The only valid attributes are 'Value' and 'Signal'."):
             state.Test = "Test"
 
 
