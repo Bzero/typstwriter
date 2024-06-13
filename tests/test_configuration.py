@@ -4,27 +4,6 @@ import configparser
 
 from typstwriter import configuration
 
-
-# example_config = """[General]
-# working_directory = /home/user/Documents/a_typst_project
-#
-# [Compiler]
-# name = custom_typst_cli
-# mode = on_demand
-#
-# [Editor]
-# save_at_run = True
-# highlighter_style = sas
-# highlight_syntax = True
-# show_line_numbers = True
-# highlight_line = True
-# use_spaces = True
-#
-# [Internals]
-# recent_files_path = ~/.config/typstwriter/recentFiles.txt
-# recent_files_length = 200"""
-
-
 example_config = """
 [Section_1]
 key_1 = /home/user/Documents/
@@ -41,9 +20,9 @@ mode = on_demand
 """
 
 
-@pytest.fixture
+@pytest.fixture()
 def custom_config(tmp_path):
-    """Writes a custom config file and returns the corresponding path"""
+    """Write a custom config file and return the corresponding path."""
     config_file_path = tmp_path / "config_file.ini"
     config_file_path.write_text(example_config)
     return config_file_path
@@ -72,8 +51,8 @@ class TestConfigManager:
 
         assert cm.get("Section_2", "key_1") == "200"
         assert cm.get("Section_2", "key_2", typ="string") == "Some Text"
-        assert cm.get("Section_2", "key_1", typ="int") == 200
-        assert cm.get("Section_2", "key_4", typ="float") == 3.5
+        assert cm.get("Section_2", "key_1", typ="int") == 200 # noqa: PLR2004
+        assert cm.get("Section_2", "key_4", typ="float") == 3.5 # noqa: PLR2004
         assert cm.get("Section_2", "key_3", typ="bool") is True
         assert cm.get("Section_2", "key_3", typ="no_type") is None
         assert "Unknown type" in caplog.text
