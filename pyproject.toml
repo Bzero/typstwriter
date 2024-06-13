@@ -59,6 +59,9 @@ docstring-code-format = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-filterwarnings = ["error"]
 pythonpath = "."
 testpaths = "tests"
+filterwarnings = ["error",
+                  "ignore:Failed to disconnect .* from signal:RuntimeWarning",
+                  "ignore:GObject.GError is deprecated; use GLib.GError instead"]
+
