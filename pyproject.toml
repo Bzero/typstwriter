@@ -61,6 +61,9 @@ docstring-code-format = false
 minversion = "6.0"
 pythonpath = "."
 testpaths = "tests"
+log_cli_level = "INFO"
+xfail_strict = true
+addopts = ["-r all", "--strict-config", "--strict-markers"]
 filterwarnings = ["error",
                   "ignore:Failed to disconnect .* from signal:RuntimeWarning",
                   "ignore:GObject.GError is deprecated; use GLib.GError instead"]
