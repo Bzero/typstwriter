@@ -155,10 +155,19 @@ class TogglingAction(QtWidgets.QAction):
         """Init."""
         QtWidgets.QAction.__init__(self, parent)
         self.setCheckable(True)
+        self.icon_on = QtGui.QIcon
+        self.icon_off = QtGui.QIcon
         self.text_on = ""
         self.text_off = ""
         self.toggled.connect(self.update_text)  # User or progammatic interaction
         self.triggered.connect(self.handle_triggered)  # User interaction
+
+    def setIcon(self, icon, state=None):
+        if state == QtGui.QIcon.State.On or state is None:
+            self.icon_on = icon
+        if state == QtGui.QIcon.State.Off or state is None:
+            self.icon_off = icon
+        self.update_icon()
 
     def setText(self, text, state=None): # noqa N802
         """Extend parent setText with state information."""
@@ -167,6 +176,12 @@ class TogglingAction(QtWidgets.QAction):
         if state == QtGui.QIcon.State.Off or state is None:
             self.text_off = text
         self.update_text()
+
+    def update_icon(self):
+        if self.isChecked() is True:
+            super().setIcon(self.icon_on)
+        else:
+            super().setIcon(self.icon_off)
 
     def update_text(self):
         """Update text when toggling."""
@@ -178,6 +193,7 @@ class TogglingAction(QtWidgets.QAction):
     def handle_triggered(self, checked):
         """Handle toggling."""
         self.update_text()
+        self.update_icon()
         if checked:
             self.activated.emit()
         else:
