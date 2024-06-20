@@ -155,8 +155,8 @@ class TogglingAction(QtWidgets.QAction):
         """Init."""
         QtWidgets.QAction.__init__(self, parent)
         self.setCheckable(True)
-        self.icon_on = QtGui.QIcon
-        self.icon_off = QtGui.QIcon
+        self.icon_on = QtGui.QIcon()
+        self.icon_off = QtGui.QIcon()
         self.text_on = ""
         self.text_off = ""
         self.toggled.connect(self.update_text)  # User or progammatic interaction
