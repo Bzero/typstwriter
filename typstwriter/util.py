@@ -163,7 +163,7 @@ class TogglingAction(QtWidgets.QAction):
         self.toggled.connect(self.update_icon)  # User or progammatic interaction
         self.triggered.connect(self.handle_triggered)  # User interaction
 
-    def setIcon(self, icon, state=None): # noqa N802
+    def setIcon(self, icon, state=None):  # noqa N802
         """Extend parent setIcon with state information."""
         if state == QtGui.QIcon.State.On or state is None:
             self.icon_on = icon
