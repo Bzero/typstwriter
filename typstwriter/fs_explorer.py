@@ -174,8 +174,12 @@ class FSExplorer(QtWidgets.QWidget):
 
     def open_directory_dialog(self):
         """Open a dialog to select root path and open said path."""
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Working Directory", self.pathBar.text(),
-                    QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks)
+        directory = QtWidgets.QFileDialog.getExistingDirectory(
+            self,
+            "Select Working Directory",
+            self.pathBar.text(),
+            QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks,
+        )
 
         if os.path.isdir(directory):
             self.set_root(directory)
@@ -240,7 +244,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.FileContextMenu.context_path = path
         self.FileContextMenu.popup(QtGui.QCursor.pos())
 
-    #TODO: Possibly move the functions below to an own class or module as they dont directly relate to the FSExplorer
+    # TODO: Possibly move the functions below to an own class or module as they dont directly relate to the FSExplorer
     def new_file_in_dir(self, head_path):
         """Prompts the user to ender a filename and creates that file in head_path."""
         tail_path, ok = QtWidgets.QInputDialog.getText(self, "Typstwriter", "Enter filename:", QtWidgets.QLineEdit.Normal)
@@ -275,7 +279,8 @@ class FSExplorer(QtWidgets.QWidget):
         """Prompts the user to enter a new name."""
         head_path, tail_path_from = os.path.split(path_from)
         tail_path_to, ok = QtWidgets.QInputDialog.getText(
-            self, "Typstwriter", "Enter new name:", QtWidgets.QLineEdit.Normal, text=tail_path_from)
+            self, "Typstwriter", "Enter new name:", QtWidgets.QLineEdit.Normal, text=tail_path_from
+        )
         if ok and tail_path_to:
             path_to = os.path.join(head_path, tail_path_to)
             self.rename(path_from, path_to)

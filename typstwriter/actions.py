@@ -24,7 +24,7 @@ class Actions(QtCore.QObject):
         self.new_File.setIcon(QtGui.QIcon(util.icon_path("newFile.svg")))
         self.new_File.setShortcut(QtGui.QKeySequence.New)
         self.new_File.setText("New File")
-#
+
         self.open_File = QtWidgets.QAction(self)
         self.open_File.setIcon(QtGui.QIcon(util.icon_path("openFile.svg")))
         self.open_File.setShortcut(QtGui.QKeySequence.Open)
@@ -115,6 +115,3 @@ class Actions(QtCore.QObject):
         self.run.setText("Start", state=QtGui.QIcon.State.Off)
         self.run.setText("Stop", state=QtGui.QIcon.State.On)
         self.run.setShortcut("Ctrl+R")
-
-
-

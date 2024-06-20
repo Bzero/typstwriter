@@ -18,7 +18,7 @@ text_compiled_erroniously = "compiled with errors"
 text_compiled_successfully = "compiled successfully"
 
 
-class CompilerConnector_FS(QtCore.QObject): # noqa: N801
+class CompilerConnector_FS(QtCore.QObject):  # noqa: N801
     """
     Abstract Class to build the interface between typstwriter and the typst backend using the filesystem for input and output.
 
@@ -103,8 +103,7 @@ class CompilerConnector_FS(QtCore.QObject): # noqa: N801
         pass
 
 
-
-class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
+class CompilerConnector_FS_onDemand(CompilerConnector_FS):  # noqa: N801
     """CompilerConnector using the filesystem and compiling on demand."""
 
     compiler_mode = enums.compiler_mode.on_demand
@@ -161,7 +160,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             # Attempt to terminate the process.
             self.process.terminate()
 
-            #TODO: kill process if it did not terminate
+            # TODO: kill process if it did not terminate
 
             self.recompile_scheduled = False
             self.process_finished(-1)
@@ -172,7 +171,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
     def process_finished(self, exitcode):
         """Finalize the compilation and trigger apropriate signals."""
         self.end_time = time.time()
-        Δ_t = (self.end_time - self.start_time) # noqa: N806
+        Δ_t = self.end_time - self.start_time  # noqa: N806
 
         self.compilation_finished.emit()
         self.stopped.emit()
@@ -183,10 +182,10 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
         self.process = None
 
         if exitcode == 0:
-            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
+            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t * 1000)
             self.document_changed.emit()
         else:
-            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t*1000)
+            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t * 1000)
 
     @QtCore.Slot()
     def check_recompilation(self):
@@ -196,7 +195,7 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS): # noqa: N801
             self.compile()
 
 
-class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
+class CompilerConnector_FS_live(CompilerConnector_FS):  # noqa: N801
     """CompilerConnector using the filesystem and compiling live."""
 
     compiler_mode = enums.compiler_mode.live
@@ -251,7 +250,7 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
             # Attempt to terminate the process.
             self.process.terminate()
 
-            #TODO: kill process if it did not terminate
+            # TODO: kill process if it did not terminate
 
             self.stopped.emit()
 
@@ -281,20 +280,20 @@ class CompilerConnector_FS_live(CompilerConnector_FS): # noqa: N801
 
         if text_compiled_erroniously in stderr:
             self.end_time = time.time()
-            Δ_t = (self.end_time - self.start_time) # noqa: N806
-            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t*1000)
+            Δ_t = self.end_time - self.start_time  # noqa: N806
+            logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t * 1000)
             self.compilation_finished.emit()
 
         if text_compiled_successfully in stderr:
             self.end_time = time.time()
             # Δ_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
-            Δ_t = (self.end_time - self.start_time) # noqa: N806
-            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t*1000)
+            Δ_t = self.end_time - self.start_time  # noqa: N806
+            logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t * 1000)
             self.document_changed.emit()
             self.compilation_finished.emit()
 
 
-#TODO: This implementation is not optimal as it has a lot of repetition with CompilerConnector.
+# TODO: This implementation is not optimal as it has a lot of repetition with CompilerConnector.
 # Attempts to make it more consise by overriding __getattr__ were not successful because of the signals
 class WrappedCompilerConnector(QtCore.QObject):
     """
@@ -331,7 +330,7 @@ class WrappedCompilerConnector(QtCore.QObject):
                 self.connect_signals()
                 logger.debug("Created a new compiler with compiler mode {}.", compiler_mode)
             case _:
-                #Use CompilerConnector_FS as a dummy which just ignores all start or compile commands
+                # Use CompilerConnector_FS as a dummy which just ignores all start or compile commands
                 self.CompilerConnector = CompilerConnector_FS(fin, fout)
                 self.connect_signals()
                 logger.warning("Attempted to create a new compiler but {} is not a valid compiler mode.", compiler_mode)
