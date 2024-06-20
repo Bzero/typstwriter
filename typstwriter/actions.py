@@ -31,7 +31,8 @@ class Actions(QtCore.QObject):
         self.open_File.setText("Open File")
 
         self.open_recent_File = QtWidgets.QAction(self)
-        self.open_recent_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpenRecent, QtGui.QIcon(util.icon_path("recentFile.svg"))))
+        self.open_recent_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpenRecent,
+                                                            QtGui.QIcon(util.icon_path("recentFile.svg"))))
         self.open_recent_File.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.SHIFT | QtCore.Qt.Key_O))
         self.open_recent_File.setText("Open Recent File")
 
@@ -112,8 +113,10 @@ class Actions(QtCore.QObject):
         self.open_config.setText("Open config file")
 
         self.run = util.TogglingAction(self)
-        self.run.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStart, QtGui.QIcon(util.icon_path("start.svg"))), state=QtGui.QIcon.State.Off)
-        self.run.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStop, QtGui.QIcon(util.icon_path("stop.svg"))), state=QtGui.QIcon.State.On)
+        self.run.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStart,
+                                               QtGui.QIcon(util.icon_path("start.svg"))), state=QtGui.QIcon.State.Off)
+        self.run.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStop,
+                                               QtGui.QIcon(util.icon_path("stop.svg"))), state=QtGui.QIcon.State.On)
         self.run.setText("Start", state=QtGui.QIcon.State.Off)
         self.run.setText("Stop", state=QtGui.QIcon.State.On)
         self.run.setShortcut("Ctrl+R")

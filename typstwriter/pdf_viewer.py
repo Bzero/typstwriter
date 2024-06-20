@@ -104,7 +104,8 @@ class PDFViewer(QtWidgets.QFrame):
 
         # Action Previous Page
         self.actionPrevious_Page = QtGui.QAction(self)
-        self.actionPrevious_Page.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.GoPrevious, QtGui.QIcon(util.icon_path("larrow.svg"))))
+        self.actionPrevious_Page.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.GoPrevious,
+                                                               QtGui.QIcon(util.icon_path("larrow.svg"))))
         self.actionPrevious_Page.setText("Previous Page")
 
         # Action Next Page

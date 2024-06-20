@@ -53,7 +53,8 @@ class CompilerOptions(QtWidgets.QWidget):
         self.line_edit_main = QtWidgets.QLineEdit(self)
         self.line_edit_main.setText("")
         self.line_edit_main.editingFinished.connect(self.main_path_edited)
-        self.folderAction = QtWidgets.QAction(QtGui.QIcon.fromTheme(QtGui.QIcon.FolderOpen ,QtGui.QIcon(util.icon_path("folder.svg"))), "open")
+        self.folderAction = QtWidgets.QAction(QtGui.QIcon.fromTheme(QtGui.QIcon.FolderOpen
+                                                                    ,QtGui.QIcon(util.icon_path("folder.svg"))), "open")
         self.folderAction.triggered.connect(self.open_file_dialog)
         self.line_edit_main.addAction(self.folderAction, QtWidgets.QLineEdit.LeadingPosition)
 
