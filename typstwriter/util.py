@@ -21,7 +21,7 @@ class FileIconProvider(QtWidgets.QFileIconProvider):
 
     def icon(self, info):
         """Return icon associated with info."""
-        if isinstance(info, QtCore.QFileInfo): # noqa SIM102
+        if isinstance(info, QtCore.QFileInfo):  # noqa SIM102
             if info.suffix() == "typ":
                 return QtGui.QIcon(icon_path("typst.png"))
         return super().icon(info)
@@ -47,11 +47,11 @@ class RecentFilesModel(QtCore.QAbstractListModel):
             case _:
                 return None
 
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole): # noqa: N802 This is an overriding function
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):  # noqa: N802 This is an overriding function
         """Return the header name."""
         return "Filepath"
 
-    def rowCount(self, index): # noqa: N802 This is an overriding function
+    def rowCount(self, index):  # noqa: N802 This is an overriding function
         """Return the number of stored filepaths."""
         return len(self.recent_files)
 
@@ -171,7 +171,7 @@ class TogglingAction(QtWidgets.QAction):
             self.icon_off = icon
         self.update_icon()
 
-    def setText(self, text, state=None): # noqa N802
+    def setText(self, text, state=None):  # noqa N802
         """Extend parent setText with state information."""
         if state == QtGui.QIcon.State.On or state is None:
             self.text_on = text

@@ -11,6 +11,7 @@ def main():
     """Run Typstwriter."""
     # Initialise logging
     from typstwriter import logging
+
     logging.setup_logger(os.environ.get("LOGLEVEL"))
     logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def main():
 
     # Initialise Config
     logger.info("Reading Config")
-    from typstwriter import configuration # noqa: F401
+    from typstwriter import configuration  # noqa: F401
 
     # Initialise State
     logger.info("Initialising State")

@@ -171,9 +171,9 @@ class PDFViewer(QtWidgets.QFrame):
         self.toolbar.addWidget(self.toolbarspacer2)
         self.toolbar.addAction(self.actionOpen_External)
 
-        self.m_pageSelector.valueChanged.connect(lambda n: self.page_selected(n-1))
+        self.m_pageSelector.valueChanged.connect(lambda n: self.page_selected(n - 1))
         nav = self.pdfView.pageNavigator()
-        nav.currentPageChanged.connect(lambda n: self.m_pageSelector.setValue(n+1))
+        nav.currentPageChanged.connect(lambda n: self.m_pageSelector.setValue(n + 1))
         self.m_pageSelector.setMinimum(1)
         # nav.backAvailableChanged.connect(self.actionBack.setEnabled)
         # nav.forwardAvailableChanged.connect(self.actionForward.setEnabled)
@@ -222,7 +222,7 @@ class PDFViewer(QtWidgets.QFrame):
             # scroll back to same point
             self.pdfView.verticalScrollBar().setValue(pos)
 
-            logger.debug("Reloaded from disk in {:.2f}ms.", (t2-t1)*1000)
+            logger.debug("Reloaded from disk in {:.2f}ms.", (t2 - t1) * 1000)
         else:
             logger.debug("Attempted to reload PDF but no valid file found at {!r}.", self.docpath)
 

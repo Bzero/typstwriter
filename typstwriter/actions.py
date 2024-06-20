@@ -24,7 +24,7 @@ class Actions(QtCore.QObject):
         self.new_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentNew, QtGui.QIcon(util.icon_path("newFile.svg"))))
         self.new_File.setShortcut(QtGui.QKeySequence.New)
         self.new_File.setText("New File")
-#
+
         self.open_File = QtWidgets.QAction(self)
         self.open_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpen, QtGui.QIcon(util.icon_path("openFile.svg"))))
         self.open_File.setShortcut(QtGui.QKeySequence.Open)

@@ -27,7 +27,7 @@ class TestFileIconProvider:
 class TestRecentFilesModel:
     """Test util.RecentFilesModel."""
 
-    file_list = ["a.txt", "b.typ", "c.py"] # noqa RUF012
+    file_list = ["a.txt", "b.typ", "c.py"]  # noqa RUF012
 
     def test_data_data(self):
         """Make sure correct data is returned."""
@@ -51,6 +51,7 @@ class TestRecentFilesModel:
         model = util.RecentFilesModel([])
         header = model.headerData(0, QtCore.Qt.Vertical)
         assert isinstance(header, str)
+
 
 class TestRecentFiles:
     """Test util.RecentFiles."""

@@ -86,7 +86,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerOptionsdock.setWidget(self.CompilerOptions)
         self.CompilerOptionsdock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable)
         self.CompilerOptionsdock.setAllowedAreas(
-            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+        )
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOptionsdock)
 
         # Compiler Output
@@ -95,7 +96,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerOutputdock.setWidget(self.CompilerOutput)
         self.CompilerOutputdock.setFeatures(QtWidgets.QDockWidget.DockWidgetMovable)
         self.CompilerOutputdock.setAllowedAreas(
-            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea)
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+        )
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.CompilerOutputdock)
 
         # CompilerConnector
@@ -139,7 +141,6 @@ class MainWindow(QtWidgets.QMainWindow):
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
-
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
         self.CompilerConnector.new_stderr.connect(self.CompilerOutput.append_to_block)
@@ -160,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.Widgetidget_31)
         self.splitter.addWidget(self.Widgetidget)
 
-    def set_layout_editorR(self): # noqa: N802
+    def set_layout_editorR(self):  # noqa: N802
         """Set Layout to Editor right, PDF left."""
         # Horizontal orientation
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
@@ -169,7 +170,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.Widgetidget_31)
         self.splitter.addWidget(self.Widgetidget)
 
-    def set_layout_editorL(self): # noqa: N802
+    def set_layout_editorL(self):  # noqa: N802
         """Set Layout to Editor left, PDF right."""
         # Horizontal orientation
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
@@ -206,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def prepare_compilation(self):
         """Set appropriate input and output files before compiling."""
-        if state.main_file.Value is None: # noqa: SIM108
+        if state.main_file.Value is None:  # noqa: SIM108
             main = self.editor.TabWidget.currentWidget().path
         else:
             main = state.main_file.Value
@@ -215,4 +216,3 @@ class MainWindow(QtWidgets.QMainWindow):
             self.CompilerConnector.set_fin(main)
             self.CompilerConnector.set_fout(util.pdf_path(main))
             self.PDFWidget.open(util.pdf_path(main))
-
