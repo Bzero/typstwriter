@@ -55,8 +55,8 @@ class Editor(QtWidgets.QFrame):
         name = "*new*"
         icon = QtGui.QIcon(util.icon_path("newFile.svg"))
         self.TabWidget.addTab(editorpage, icon, name)
-        self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("green"))
+        self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("green"))
 
         editorpage.edit.textChanged.connect(self.childtext_changed)
         editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -69,8 +69,8 @@ class Editor(QtWidgets.QFrame):
             name = os.path.relpath(path, start=state.working_directory.Value)
             icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
             self.TabWidget.addTab(editorpage, icon, name)
-            self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-            self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("black"))
+            self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+            self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("black"))
 
             editorpage.edit.textChanged.connect(self.childtext_changed)
             editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -122,8 +122,8 @@ class Editor(QtWidgets.QFrame):
         welcomepage = WelcomePage(self.recentFiles.list())
         icon = QtGui.QIcon()
         self.TabWidget.addTab(welcomepage, icon, "Welcome")
-        self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("blue"))
+        self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("blue"))
         welcomepage.button_NewFile.pressed.connect(self.new_file)
         welcomepage.button_OpenFile.pressed.connect(self.open_file_dialog)
         welcomepage.open_file.connect(self.open_file)
@@ -231,10 +231,9 @@ class EditorPage(QtWidgets.QFrame):
         line_conf = config.get("Editor", "highlight_line", "bool")
         use_spaces = config.get("Editor", "use_spaces", "bool")
 
-        self.edit = CodeEdit(highlight_synatx=syntax_conf,
-                             show_line_numbers=line_numbers_conf,
-                             highlight_line=line_conf,
-                             use_spaces=use_spaces)
+        self.edit = CodeEdit(
+            highlight_synatx=syntax_conf, show_line_numbers=line_numbers_conf, highlight_line=line_conf, use_spaces=use_spaces
+        )
         self.verticalLayout.addWidget(self.edit)
 
         self.edit.textChanged.connect(self.modified)
@@ -291,7 +290,7 @@ class EditorPage(QtWidgets.QFrame):
         """Save file under a new name."""
         path, cd = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", state.working_directory.Value)
 
-        if (os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK)):
+        if os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK):
             self.path = path
             self.save()
             self.pathchanged.emit(self.path)
@@ -436,7 +435,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         self.use_spaces = use_spaces
 
-    def resizeEvent(self, *e): # noqa: N802 This is an overriding function
+    def resizeEvent(self, *e):  # noqa: N802 This is an overriding function
         """Resize."""
         super().resizeEvent(*e)
 
@@ -446,7 +445,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             rect = QtCore.QRect(cr.left(), cr.top(), width, cr.height())
             self.line_numbers.setGeometry(rect)
 
-    def keyPressEvent(self, e): # noqa: N802 This is an overriding function
+    def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
         """Intercept, modify and forward keyPressEvent."""
         # Replace tabs with spaces
         if self.use_spaces and e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
@@ -481,13 +480,14 @@ class LineNumberWidget(QtWidgets.QWidget):
         """Init."""
         QtWidgets.QWidget.__init__(self, parent)
 
-    def paintEvent(self, event): # noqa: N802 This is an overriding function
+    def paintEvent(self, event):  # noqa: N802 This is an overriding function
         """Paint the widget."""
         painter = QtGui.QPainter(self)
 
         # paint background
-        painter.fillRect(event.rect(),
-                         QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color))
+        painter.fillRect(
+            event.rect(), QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color)
+        )
 
         # paint line numbers
         painter.setPen(QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_color))
@@ -501,7 +501,7 @@ class LineNumberWidget(QtWidgets.QWidget):
             text_height = self.fontMetrics().height()
             painter.drawText(0, y, text_width, text_height, QtCore.Qt.AlignRight, line_number)
 
-            if y <= event.rect().bottom(): # noqa: SIM108
+            if y <= event.rect().bottom():  # noqa: SIM108
                 block = block.next()
             else:
                 block = None

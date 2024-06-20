@@ -12,7 +12,7 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 "/usr/local/etc/typstwriter/typstwriter.ini",
                 default_config_path,
                 os.path.expanduser("~/.typstwriter.ini"),
-                "./typstwriter.ini"]
+                "./typstwriter.ini"]  # fmt: skip
 
 default_config = {"General": {"working_directory": "~/"},
                   "Compiler": {"name": "typst",
@@ -24,7 +24,7 @@ default_config = {"General": {"working_directory": "~/"},
                              "highlight_line": True,
                              "use_spaces": True},
                   "Internals": {"recent_files_path": "~/.config/typstwriter/recentFiles.txt",
-                                "recent_files_length": 16}}
+                                "recent_files_length": 16}}  # fmt: skip
 
 
 class ConfigManager:
