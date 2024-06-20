@@ -75,7 +75,7 @@ class RecentFilesMenu(QtWidgets.QMenu):
         """Init."""
         QtWidgets.QMenu.__init__(self)
 
-        self.setIcon(QtGui.QIcon(util.icon_path("recentFile.svg")))
+        self.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpenRecent, QtGui.QIcon(util.icon_path("recentFile.svg"))))
         self.setTitle("Open recent file")
 
         self.addAction("")
