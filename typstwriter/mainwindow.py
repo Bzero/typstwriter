@@ -148,7 +148,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Display
         self.showMaximized()
-        self.actions.layout_typewriter.trigger()
+
+        # Use default layout
+        match config.get("General", "default_layout"):
+            case "typewriter":
+                self.actions.layout_typewriter.trigger()
+            case "editor_right":
+                self.actions.layout_editorR.trigger()
+            case "editor_left":
+                self.actions.layout_editorL.trigger()
+            case _:
+                self.actions.layout_typewriter.trigger()
 
         logger.info("Gui ready")
 
