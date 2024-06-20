@@ -160,6 +160,7 @@ class TogglingAction(QtWidgets.QAction):
         self.text_on = ""
         self.text_off = ""
         self.toggled.connect(self.update_text)  # User or progammatic interaction
+        self.toggled.connect(self.update_icon)  # User or progammatic interaction
         self.triggered.connect(self.handle_triggered)  # User interaction
 
     def setIcon(self, icon, state=None):
