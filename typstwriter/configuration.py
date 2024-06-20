@@ -14,7 +14,8 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 os.path.expanduser("~/.typstwriter.ini"),
                 "./typstwriter.ini"]  # fmt: skip
 
-default_config = {"General": {"working_directory": "~/"},
+default_config = {"General": {"working_directory": "~/",
+                              "default_layout": "typewriter"},
                   "Compiler": {"name": "typst",
                                "mode": "on_demand"},
                   "Editor": {"save_at_run": False,
