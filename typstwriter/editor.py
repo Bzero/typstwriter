@@ -333,8 +333,8 @@ class EditorPage(QtWidgets.QFrame):
         self.gridLayout = QtWidgets.QGridLayout()
 
         self.label_w = QtWidgets.QLabel()
-        if(QtGui.QIcon.hasThemeIcon(QtGui.QIcon.DialogWarning)):
-            self.label_w.setPixmap(QtGui.QIcon.fromTheme(QtGui.QIcon.DialogWarning).pixmap(64))
+        if(QtGui.QIcon.hasThemeIcon("data-warning")):
+            self.label_w.setPixmap(QtGui.QIcon.fromTheme("data-warning").pixmap(64))
         else:
             self.label_w.setPixmap(QtGui.QPixmap(util.icon_path("warning.svg")))
         self.label_t = QtWidgets.QLabel("<h1>" + msg + "</h1>")
