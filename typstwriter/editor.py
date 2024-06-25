@@ -5,6 +5,7 @@ from qtpy import QtWidgets
 import os
 
 import superqt.utils
+import pygments
 
 from typstwriter import util
 
@@ -415,11 +416,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """Init and set options."""
         super().__init__()
 
-        if highlight_synatx:
-            highlight_style = config.get("Editor", "highlighter_style")
-            self.highlighter = superqt.utils.CodeSyntaxHighlight(self.document(), "typst", highlight_style)
-            palette = self.palette()
-            palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
+        highlight_style = config.get("Editor", "highlighter_style")
+        self.highlighter = superqt.utils.CodeSyntaxHighlight(self.document(), "typst", highlight_style)
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
+        self.setPalette(palette)
+
+        if not highlight_synatx:
+            self.highlighter.setDocument(None)
+            palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.formatter.style.styles[pygments.token.Token]))
             self.setPalette(palette)
 
         if show_line_numbers:
