@@ -66,6 +66,12 @@ Run the tests with pytest to make sure that everything is working correctly. Ins
 pytest
 ```
 
+Activate pre-commit hooks to automatically check changes before committing. Inside the source directory, run:
+
+```
+pre-commit install
+```
+
 ## Contributing
 
 Contributions are always welcome!
