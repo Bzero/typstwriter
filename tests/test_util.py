@@ -27,7 +27,7 @@ class TestFileIconProvider:
 class TestRecentFilesModel:
     """Test util.RecentFilesModel."""
 
-    file_list = ["a.txt", "b.typ", "c.py"] # noqa RUF012
+    file_list = ["a.txt", "b.typ", "c.py"]  # noqa RUF012
 
     def test_data_data(self):
         """Make sure correct data is returned."""
@@ -156,4 +156,3 @@ class TestTogglingAction:
 
         with qtbot.waitSignal(action.activated):
             action.trigger()
-

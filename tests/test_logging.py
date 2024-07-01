@@ -49,4 +49,3 @@ def test_setup_logger(capsys):
     logger.info("A test")
     (out, err) = capsys.readouterr()
     assert match(r"INFO\s+\S+ \S+\s+test_logging.py\s+test_setup_logger\s+line \d+\s+: A test", err)
-

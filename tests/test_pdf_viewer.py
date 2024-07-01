@@ -42,16 +42,22 @@ class TestZoomSelector:
         zoomselector = pdf_viewer.ZoomSelector(None)
         zoomselector.lineEdit().setText("")
 
-        with qtbot.waitSignals([(zoomselector.zoom_mode_changed, "zoom_mode_changed"),
-                                (zoomselector.zoom_factor_changed, "zoom_factor_changed")]) as blocker:
+        with qtbot.waitSignals(
+            [(zoomselector.zoom_mode_changed, "zoom_mode_changed"), (zoomselector.zoom_factor_changed, "zoom_factor_changed")]
+        ) as blocker:
             zoomselector.lineEdit().setText(f"{int(zoom*100)}%")
 
         args = [s.args for s in blocker.all_signals_and_args]
         assert (zoom,) in args
         assert (QtPdfWidgets.QPdfView.ZoomMode.Custom,) in args
 
-    @pytest.mark.parametrize(("text", "mode"), [("Fit Page Width", QtPdfWidgets.QPdfView.ZoomMode.FitToWidth),
-                                                ("Fit Page Height", QtPdfWidgets.QPdfView.ZoomMode.FitInView)])
+    @pytest.mark.parametrize(
+        ("text", "mode"),
+        [
+            ("Fit Page Width", QtPdfWidgets.QPdfView.ZoomMode.FitToWidth),
+            ("Fit Page Height", QtPdfWidgets.QPdfView.ZoomMode.FitInView),
+        ],
+    )
     def test_mode_user_input(self, qtbot, text, mode):
         """Make sure the zoom factor can be set."""
         zoomselector = pdf_viewer.ZoomSelector(None)
@@ -69,8 +75,9 @@ class TestZoomSelector:
         """Make sure the zoom factor can be set."""
         zoomselector = pdf_viewer.ZoomSelector(None)
 
-        with qtbot.waitSignals([(zoomselector.zoom_mode_changed, "zoom_mode_changed"),
-                                (zoomselector.zoom_factor_changed, "zoom_factor_changed")]) as blocker:
+        with qtbot.waitSignals(
+            [(zoomselector.zoom_mode_changed, "zoom_mode_changed"), (zoomselector.zoom_factor_changed, "zoom_factor_changed")]
+        ) as blocker:
             zoomselector.set_zoom_factor(zoom)
 
         args = [s.args for s in blocker.all_signals_and_args]
@@ -81,8 +88,9 @@ class TestZoomSelector:
         """Test reset functionality."""
         zoomselector = pdf_viewer.ZoomSelector(None)
 
-        with qtbot.waitSignals([(zoomselector.zoom_mode_changed, "zoom_mode_changed"),
-                                (zoomselector.zoom_factor_changed, "zoom_factor_changed")]) as blocker:
+        with qtbot.waitSignals(
+            [(zoomselector.zoom_mode_changed, "zoom_mode_changed"), (zoomselector.zoom_factor_changed, "zoom_factor_changed")]
+        ) as blocker:
             zoomselector.reset()
 
         args = [s.args for s in blocker.all_signals_and_args]
@@ -112,7 +120,7 @@ class TestPDFViewer:
         assert pdf_v.m_document.status() == QtPdf.QPdfDocument.Status.Ready
         assert "not a valid file" not in caplog.text
 
-        #TODO: Test opening non pdf file
+        # TODO: Test opening non pdf file
 
     @pytest.mark.parametrize("pdf_pages", [1, 2])
     def test_reload(self, qtbot, caplog, tmp_pdf):
@@ -123,7 +131,7 @@ class TestPDFViewer:
         pdf_v.open(str(tmp_pdf))
 
         sb = pdf_v.pdfView.verticalScrollBar()
-        sb.setValue((sb.maximum() - sb.minimum())/2)
+        sb.setValue((sb.maximum() - sb.minimum()) / 2)
         pos = sb.value()
 
         pdf_v.reload()
@@ -147,15 +155,15 @@ class TestPDFViewer:
         pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom*100)}%")
         pdf_v.actionZoom_Out.trigger()
         assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom*100/1.2)}%"
-        assert pdf_v.pdfView.zoomFactor() == zoom/1.2
+        assert pdf_v.pdfView.zoomFactor() == zoom / 1.2
 
         pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom*100)}%")
         pdf_v.actionZoom_In.trigger()
         assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom*100*1.2)}%"
-        assert pdf_v.pdfView.zoomFactor() == zoom*1.2
+        assert pdf_v.pdfView.zoomFactor() == zoom * 1.2
 
-        #TODO: test fit width
-        #TODO; test fit height
+        # TODO: test fit width
+        # TODO; test fit height
 
     @pytest.mark.parametrize("pdf_pages", [1, 4, 10])
     def test_page_movement(self, qtbot, caplog, tmp_pdf, pdf_pages):
@@ -186,7 +194,7 @@ class TestPDFViewer:
         assert pdf_v.m_pageSelector.text() == str(min(3, pdf_pages))
         assert pdf_v.pdfView.pageNavigator().currentPage() + 1 == min(3, pdf_pages)
 
-        #TODO: Test scrolling
+        # TODO: Test scrolling
 
     @pytest.mark.parametrize("pdf_pages", [1, 2])
     def test_open_in_external_viewer(self, qtbot, caplog, tmp_pdf, monkeypatch):

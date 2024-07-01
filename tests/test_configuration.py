@@ -51,8 +51,8 @@ class TestConfigManager:
 
         assert cm.get("Section_2", "key_1") == "200"
         assert cm.get("Section_2", "key_2", typ="string") == "Some Text"
-        assert cm.get("Section_2", "key_1", typ="int") == 200 # noqa: PLR2004
-        assert cm.get("Section_2", "key_4", typ="float") == 3.5 # noqa: PLR2004
+        assert cm.get("Section_2", "key_1", typ="int") == 200  # noqa: PLR2004
+        assert cm.get("Section_2", "key_4", typ="float") == 3.5  # noqa: PLR2004
         assert cm.get("Section_2", "key_3", typ="bool") is True
         assert cm.get("Section_2", "key_3", typ="no_type") is None
         assert "Unknown type" in caplog.text
