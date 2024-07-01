@@ -202,7 +202,7 @@ class PDFViewer(QtWidgets.QFrame):
             self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
         else:
             self.m_document.close()
-            logger.warning("{!r} is not a valid  file", path)
+            logger.warning("{!r} is not a valid file", path)
 
     @QtCore.Slot()
     def reload(self):
@@ -249,13 +249,13 @@ class PDFViewer(QtWidgets.QFrame):
     def previous_page_triggered(self):
         """Switch to previous page."""
         nav = self.pdfView.pageNavigator()
-        nav.jump(nav.currentPage() - 1, QtCore.QPointF(), nav.currentZoom())
+        nav.jump(max(nav.currentPage() - 1, 0), QtCore.QPointF(), nav.currentZoom())
 
     @QtCore.Slot()
     def next_page_triggered(self):
         """Switch to next page."""
         nav = self.pdfView.pageNavigator()
-        nav.jump(nav.currentPage() + 1, QtCore.QPointF(), nav.currentZoom())
+        nav.jump(min(nav.currentPage() + 1, self.pdfView.document().pageCount() - 1), QtCore.QPointF(), nav.currentZoom())
 
     @QtCore.Slot()
     def open_in_external_viewer(self):

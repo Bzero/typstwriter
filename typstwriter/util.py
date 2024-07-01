@@ -151,7 +151,7 @@ class TogglingAction(QtWidgets.QAction):
     activated = QtCore.Signal()
     deactivated = QtCore.Signal()
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         """Init."""
         QtWidgets.QAction.__init__(self, parent)
         self.setCheckable(True)

@@ -28,7 +28,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 tests = [
   "pytest",
-  "pytest-qt"
+  "pytest-qt",
+  "fpdf"
 ]
 
 [project.urls]

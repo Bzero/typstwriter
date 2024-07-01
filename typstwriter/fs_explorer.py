@@ -302,4 +302,6 @@ class FSExplorer(QtWidgets.QWidget):
             try:
                 send2trash.send2trash(path)
             except send2trash.TrashPermissionError:
-                logger.warning("Could not move {!r} to trash.")
+                logger.warning("Could not move {!r} to trash: Permission denied.", path)
+            except OSError:
+                logger.warning("Could not move {!r} to trash: Unknown Error.", path)

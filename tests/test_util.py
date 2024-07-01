@@ -41,6 +41,12 @@ class TestRecentFilesModel:
         for i, _ in enumerate(self.file_list):
             assert isinstance(model.data(model.createIndex(i, 0, None), QtCore.Qt.DecorationRole), QtGui.QIcon)
 
+    def test_data_other(self):
+        """Make sure an None is returned for other role."""
+        model = util.RecentFilesModel(self.file_list)
+        for i, _ in enumerate(self.file_list):
+            assert model.data(model.createIndex(i, 0, None), QtCore.Qt.EditRole) is None
+
     def test_rowCount(self):
         """Make sure the row_count is correct."""
         model = util.RecentFilesModel(self.file_list)
@@ -119,3 +125,34 @@ def test_pdf_path():
     assert util.pdf_path("a/b/c/.d.typ") == "a/b/c/.d.pdf"
     assert util.pdf_path("d.typ") == "d.pdf"
     assert util.pdf_path(".d.typ") == ".d.pdf"
+
+
+class TestTogglingAction:
+    """Test util.TestTogglingAction."""
+
+    def test_text_toggle(self):
+        """Make sure the text toggles."""
+        action = util.TogglingAction()
+        action.setText("Off", state=QtGui.QIcon.State.Off)
+        action.setText("On", state=QtGui.QIcon.State.On)
+
+        action.setChecked(True)
+        assert action.text() == "On"
+
+        action.toggle()
+        assert action.text() == "Off"
+
+        action.toggle()
+        assert action.text() == "On"
+
+    def test_triggered_signal(self, qtbot):
+        """Make sure the activated and deactivated signals are emitted."""
+        action = util.TogglingAction()
+
+        action.setChecked(True)
+
+        with qtbot.waitSignal(action.deactivated):
+            action.trigger()
+
+        with qtbot.waitSignal(action.activated):
+            action.trigger()
