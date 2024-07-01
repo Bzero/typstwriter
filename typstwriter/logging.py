@@ -44,6 +44,6 @@ def setup_logger(level):
         log.setLevel("INFO")
 
 
-def getLogger(name): # noqa N802
+def getLogger(name):  # noqa N802
     """Get brace style logger."""
     return StyleAdapter(logging.getLogger(name))

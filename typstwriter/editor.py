@@ -54,10 +54,10 @@ class Editor(QtWidgets.QFrame):
         """Open a new, empty file."""
         editorpage = EditorPage()
         name = "*new*"
-        icon = QtGui.QIcon(util.icon_path("newFile.svg"))
+        icon = QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentNew, QtGui.QIcon(util.icon_path("newFile.svg")))
         self.TabWidget.addTab(editorpage, icon, name)
-        self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("green"))
+        self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("green"))
 
         editorpage.edit.textChanged.connect(self.childtext_changed)
         editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -70,8 +70,8 @@ class Editor(QtWidgets.QFrame):
             name = os.path.relpath(path, start=state.working_directory.Value)
             icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
             self.TabWidget.addTab(editorpage, icon, name)
-            self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-            self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("black"))
+            self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+            self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("black"))
 
             editorpage.edit.textChanged.connect(self.childtext_changed)
             editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -123,8 +123,8 @@ class Editor(QtWidgets.QFrame):
         welcomepage = WelcomePage(self.recentFiles.list())
         icon = QtGui.QIcon()
         self.TabWidget.addTab(welcomepage, icon, "Welcome")
-        self.TabWidget.setCurrentIndex(self.TabWidget.count()-1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count()-1, QtGui.QColor("blue"))
+        self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
+        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("blue"))
         welcomepage.button_NewFile.pressed.connect(self.new_file)
         welcomepage.button_OpenFile.pressed.connect(self.open_file_dialog)
         welcomepage.open_file.connect(self.open_file)
@@ -232,10 +232,9 @@ class EditorPage(QtWidgets.QFrame):
         line_conf = config.get("Editor", "highlight_line", "bool")
         use_spaces = config.get("Editor", "use_spaces", "bool")
 
-        self.edit = CodeEdit(highlight_synatx=syntax_conf,
-                             show_line_numbers=line_numbers_conf,
-                             highlight_line=line_conf,
-                             use_spaces=use_spaces)
+        self.edit = CodeEdit(
+            highlight_synatx=syntax_conf, show_line_numbers=line_numbers_conf, highlight_line=line_conf, use_spaces=use_spaces
+        )
         self.verticalLayout.addWidget(self.edit)
 
         self.edit.textChanged.connect(self.modified)
@@ -292,7 +291,7 @@ class EditorPage(QtWidgets.QFrame):
         """Save file under a new name."""
         path, cd = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", state.working_directory.Value)
 
-        if (os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK)):
+        if os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK):
             self.path = path
             self.save()
             self.pathchanged.emit(self.path)
@@ -334,7 +333,10 @@ class EditorPage(QtWidgets.QFrame):
         self.gridLayout = QtWidgets.QGridLayout()
 
         self.label_w = QtWidgets.QLabel()
-        self.label_w.setPixmap(QtGui.QPixmap(util.icon_path("warning.svg")))
+        if QtGui.QIcon.hasThemeIcon("data-warning"):
+            self.label_w.setPixmap(QtGui.QIcon.fromTheme("data-warning").pixmap(64))
+        else:
+            self.label_w.setPixmap(QtGui.QPixmap(util.icon_path("warning.svg")))
         self.label_t = QtWidgets.QLabel("<h1>" + msg + "</h1>")
 
         self.gridLayout.addWidget(self.label_w, 0, 1)
@@ -441,7 +443,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         self.use_spaces = use_spaces
 
-    def resizeEvent(self, *e): # noqa: N802 This is an overriding function
+    def resizeEvent(self, *e):  # noqa: N802 This is an overriding function
         """Resize."""
         super().resizeEvent(*e)
 
@@ -451,11 +453,23 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             rect = QtCore.QRect(cr.left(), cr.top(), width, cr.height())
             self.line_numbers.setGeometry(rect)
 
-    def keyPressEvent(self, e): # noqa: N802 This is an overriding function
+    def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
         """Intercept, modify and forward keyPressEvent."""
-        # Replace tabs with spaces
-        if self.use_spaces and e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
-            e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
+        # Indent if Tab pressed
+        if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
+            if self.textCursor().hasSelection():
+                self.indent()
+            elif self.use_spaces:
+                self._insert_tab(self.textCursor())
+            return
+
+        # Unindent if Shift+Tab pressed
+        if e.key() == QtCore.Qt.Key_Backtab and e.modifiers() == QtCore.Qt.ShiftModifier:
+            if self.textCursor().hasSelection():
+                self.unindent()
+            else:
+                self._remove_tab_l(self.textCursor())
+            return
 
         # Avoid inserting line break characters
         if e.key() == QtCore.Qt.Key_Return and e.modifiers() == QtCore.Qt.ShiftModifier:
@@ -475,6 +489,58 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         else:
             self.setExtraSelections([])
 
+    def _insert_tab(self, cursor):
+        """Insert a tab (or four spaces) right of the cursor."""
+        tab = "    " if self.use_spaces else "\t"
+        cursor.insertText(tab)
+
+    def _remove_tab_r(self, cursor):
+        """Remove a tab or up to four spaces right of the cursor."""
+        ntext = cursor.block().text()[cursor.positionInBlock() :: 1]
+        if ntext.startswith("\t"):
+            cursor.deleteChar()
+        else:
+            for c in ntext[0:4]:
+                if c != " ":
+                    break
+                cursor.deleteChar()
+
+    def _remove_tab_l(self, cursor):
+        """Remove a tab or up to four spaces left of the cursor."""
+        ntext = cursor.block().text()[cursor.positionInBlock() - 1 :: -1]
+        if ntext.startswith("\t"):
+            cursor.deletePreviousChar()
+        else:
+            for c in ntext[0:4]:
+                if c != " ":
+                    break
+                cursor.deletePreviousChar()
+
+    def indent(self):
+        """Indent the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            if cursor.block().text():
+                self._insert_tab(cursor)
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
+
+    def unindent(self):
+        """Unindent the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            self._remove_tab_r(cursor)
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
+
 
 class LineNumberWidget(QtWidgets.QWidget):
     """A widget supposed to be attached to a QPlainTextEdit showing line numbers."""
@@ -486,13 +552,14 @@ class LineNumberWidget(QtWidgets.QWidget):
         """Init."""
         QtWidgets.QWidget.__init__(self, parent)
 
-    def paintEvent(self, event): # noqa: N802 This is an overriding function
+    def paintEvent(self, event):  # noqa: N802 This is an overriding function
         """Paint the widget."""
         painter = QtGui.QPainter(self)
 
         # paint background
-        painter.fillRect(event.rect(),
-                         QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color))
+        painter.fillRect(
+            event.rect(), QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color)
+        )
 
         # paint line numbers
         painter.setPen(QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_color))
@@ -506,7 +573,7 @@ class LineNumberWidget(QtWidgets.QWidget):
             text_height = self.fontMetrics().height()
             painter.drawText(0, y, text_width, text_height, QtCore.Qt.AlignRight, line_number)
 
-            if y <= event.rect().bottom(): # noqa: SIM108
+            if y <= event.rect().bottom():  # noqa: SIM108
                 block = block.next()
             else:
                 block = None

@@ -21,7 +21,7 @@ class FileIconProvider(QtWidgets.QFileIconProvider):
 
     def icon(self, info):
         """Return icon associated with info."""
-        if isinstance(info, QtCore.QFileInfo): # noqa SIM102
+        if isinstance(info, QtCore.QFileInfo):  # noqa SIM102
             if info.suffix() == "typ":
                 return QtGui.QIcon(icon_path("typst.png"))
         return super().icon(info)
@@ -47,11 +47,11 @@ class RecentFilesModel(QtCore.QAbstractListModel):
             case _:
                 return None
 
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole): # noqa: N802 This is an overriding function
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):  # noqa: N802 This is an overriding function
         """Return the header name."""
         return "Filepath"
 
-    def rowCount(self, index): # noqa: N802 This is an overriding function
+    def rowCount(self, index):  # noqa: N802 This is an overriding function
         """Return the number of stored filepaths."""
         return len(self.recent_files)
 
@@ -155,18 +155,36 @@ class TogglingAction(QtWidgets.QAction):
         """Init."""
         QtWidgets.QAction.__init__(self, parent)
         self.setCheckable(True)
+        self.icon_on = QtGui.QIcon()
+        self.icon_off = QtGui.QIcon()
         self.text_on = ""
         self.text_off = ""
         self.toggled.connect(self.update_text)  # User or progammatic interaction
+        self.toggled.connect(self.update_icon)  # User or progammatic interaction
         self.triggered.connect(self.handle_triggered)  # User interaction
 
-    def setText(self, text, state=None): # noqa N802
+    def setIcon(self, icon, state=None):  # noqa N802
+        """Extend parent setIcon with state information."""
+        if state == QtGui.QIcon.State.On or state is None:
+            self.icon_on = icon
+        if state == QtGui.QIcon.State.Off or state is None:
+            self.icon_off = icon
+        self.update_icon()
+
+    def setText(self, text, state=None):  # noqa N802
         """Extend parent setText with state information."""
         if state == QtGui.QIcon.State.On or state is None:
             self.text_on = text
         if state == QtGui.QIcon.State.Off or state is None:
             self.text_off = text
         self.update_text()
+
+    def update_icon(self):
+        """Update icon when toggling."""
+        if self.isChecked() is True:
+            super().setIcon(self.icon_on)
+        else:
+            super().setIcon(self.icon_off)
 
     def update_text(self):
         """Update text when toggling."""
@@ -178,6 +196,7 @@ class TogglingAction(QtWidgets.QAction):
     def handle_triggered(self, checked):
         """Handle toggling."""
         self.update_text()
+        self.update_icon()
         if checked:
             self.activated.emit()
         else:
@@ -189,3 +208,17 @@ def icon_path(name):
     packagedir = os.path.dirname(__file__)
     path = os.path.join(packagedir, "icons", name)
     return path
+
+
+def selection_start_block(cursor):
+    """Return the block number of the selection start."""
+    c = QtGui.QTextCursor(cursor)
+    c.setPosition(cursor.selectionStart())
+    return c.blockNumber()
+
+
+def selection_end_block(cursor):
+    """Return the block number of the selection end."""
+    c = QtGui.QTextCursor(cursor)
+    c.setPosition(cursor.selectionEnd())
+    return c.blockNumber()

@@ -21,69 +21,74 @@ class Actions(QtCore.QObject):
         super().__init__(parent)
 
         self.new_File = QtWidgets.QAction(self)
-        self.new_File.setIcon(QtGui.QIcon(util.icon_path("newFile.svg")))
+        self.new_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentNew, QtGui.QIcon(util.icon_path("newFile.svg"))))
         self.new_File.setShortcut(QtGui.QKeySequence.New)
         self.new_File.setText("New File")
-#
+
         self.open_File = QtWidgets.QAction(self)
-        self.open_File.setIcon(QtGui.QIcon(util.icon_path("openFile.svg")))
+        self.open_File.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpen, QtGui.QIcon(util.icon_path("openFile.svg"))))
         self.open_File.setShortcut(QtGui.QKeySequence.Open)
         self.open_File.setText("Open File")
 
         self.open_recent_File = QtWidgets.QAction(self)
-        self.open_recent_File.setIcon(QtGui.QIcon(util.icon_path("recentFile.svg")))
+        self.open_recent_File.setIcon(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentOpenRecent, QtGui.QIcon(util.icon_path("recentFile.svg")))
+        )
         self.open_recent_File.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.SHIFT | QtCore.Qt.Key_O))
         self.open_recent_File.setText("Open Recent File")
 
         self.save = QtWidgets.QAction(self)
-        self.save.setIcon(QtGui.QIcon(util.icon_path("save.svg")))
+        self.save.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentSave, QtGui.QIcon(util.icon_path("save.svg"))))
         self.save.setShortcut(QtGui.QKeySequence.Save)
         self.save.setText("Save")
 
         self.save_as = QtWidgets.QAction(self)
-        self.save_as.setIcon(QtGui.QIcon(util.icon_path("save_as.svg")))
+        self.save_as.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentSaveAs, QtGui.QIcon(util.icon_path("save_as.svg"))))
         self.save_as.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.SHIFT | QtCore.Qt.Key_S))
         self.save_as.setText("Save As")
 
         self.close = QtWidgets.QAction(self)
-        self.close.setIcon(QtGui.QIcon(util.icon_path("closeFile.svg")))
+        self.close.setIcon(QtGui.QIcon.fromTheme("document-close-symbolic", QtGui.QIcon(util.icon_path("closeFile.svg"))))
         self.close.setShortcut(QtGui.QKeySequence.Close)
         self.close.setText("Close")
 
         self.quit = QtWidgets.QAction(self)
-        self.quit.setIcon(QtGui.QIcon(util.icon_path("quit.svg")))
+        self.quit.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ApplicationExit, QtGui.QIcon(util.icon_path("quit.svg"))))
         self.quit.setShortcut(QtGui.QKeySequence.Quit)
         self.quit.setText("Quit")
 
         self.cut = QtWidgets.QAction(self)
-        self.cut.setIcon(QtGui.QIcon(util.icon_path("cut.svg")))
+        self.cut.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditCut, QtGui.QIcon(util.icon_path("cut.svg"))))
         self.cut.setShortcut(QtGui.QKeySequence.Cut)
         self.cut.setText("Cut")
 
         self.copy = QtWidgets.QAction(self)
-        self.copy.setIcon(QtGui.QIcon(util.icon_path("copy.svg")))
+        self.copy.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditCopy, QtGui.QIcon(util.icon_path("copy.svg"))))
         self.copy.setShortcut(QtGui.QKeySequence.Copy)
         self.copy.setText("Copy")
 
         self.paste = QtWidgets.QAction(self)
-        self.paste.setIcon(QtGui.QIcon(util.icon_path("paste.svg")))
+        self.paste.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditPaste, QtGui.QIcon(util.icon_path("paste.svg"))))
         self.paste.setShortcut(QtGui.QKeySequence.Paste)
         self.paste.setText("Paste")
 
         self.search = QtWidgets.QAction(self)
-        self.search.setIcon(QtGui.QIcon(util.icon_path("quit.svg")))
+        self.search.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditFind, QtGui.QIcon(util.icon_path("quit.svg"))))
         self.search.setShortcut(QtGui.QKeySequence.Find)
         self.search.setText("Search")
 
         self.layout_typewriter = QtWidgets.QAction(self)
+        self.layout_typewriter.setIcon(QtGui.QIcon.fromTheme("view-split-top-bottom-symbolic"))
         self.layout_typewriter.setText("Layout: Typewriter")
         self.layout_typewriter.setCheckable(True)
 
         self.layout_editorL = QtWidgets.QAction(self)
+        self.layout_editorL.setIcon(QtGui.QIcon.fromTheme("view-split-left-right-symbolic"))
         self.layout_editorL.setText("Layout: Editor Left")
         self.layout_editorL.setCheckable(True)
 
         self.layout_editorR = QtWidgets.QAction(self)
+        self.layout_editorR.setIcon(QtGui.QIcon.fromTheme("view-split-left-right-symbolic"))
         self.layout_editorR.setText("Layout: Editor Right")
         self.layout_editorR.setCheckable(True)
 
@@ -105,16 +110,18 @@ class Actions(QtCore.QObject):
         self.show_compiler_output.setCheckable(True)
 
         self.open_config = QtWidgets.QAction(self)
+        self.open_config.setIcon(QtGui.QIcon.fromTheme("configure-symbolic"))
         self.open_config.setText("Open config file")
 
         self.run = util.TogglingAction(self)
-        icon = QtGui.QIcon()
-        icon.addFile(util.icon_path("start.svg"), state=QtGui.QIcon.State.Off)
-        icon.addFile(util.icon_path("stop.svg"), state=QtGui.QIcon.State.On)
-        self.run.setIcon(icon)
+        self.run.setIcon(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStart, QtGui.QIcon(util.icon_path("start.svg"))),
+            state=QtGui.QIcon.State.Off,
+        )
+        self.run.setIcon(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.MediaPlaybackStop, QtGui.QIcon(util.icon_path("stop.svg"))),
+            state=QtGui.QIcon.State.On,
+        )
         self.run.setText("Start", state=QtGui.QIcon.State.Off)
         self.run.setText("Stop", state=QtGui.QIcon.State.On)
         self.run.setShortcut("Ctrl+R")
-
-
-

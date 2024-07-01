@@ -92,30 +92,32 @@ class PDFViewer(QtWidgets.QFrame):
 
         # Action Zoom In
         self.actionZoom_In = QtGui.QAction(self)
-        self.actionZoom_In.setIcon(QtGui.QIcon(util.icon_path("plus.svg")))
+        self.actionZoom_In.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomIn, QtGui.QIcon(util.icon_path("plus.svg"))))
         self.actionZoom_In.setText("Zoom In")
         self.actionZoom_In.setShortcut("Ctrl++")
 
         # Action Zoom Out
         self.actionZoom_Out = QtGui.QAction(self)
-        self.actionZoom_Out.setIcon(QtGui.QIcon(util.icon_path("minus.svg")))
+        self.actionZoom_Out.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomOut, QtGui.QIcon(util.icon_path("minus.svg"))))
         self.actionZoom_Out.setText("Zoom Out")
         self.actionZoom_Out.setShortcut("Ctrl+-")
 
         # Action Previous Page
         self.actionPrevious_Page = QtGui.QAction(self)
-        self.actionPrevious_Page.setIcon(QtGui.QIcon(util.icon_path("larrow.svg")))
+        self.actionPrevious_Page.setIcon(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.GoPrevious, QtGui.QIcon(util.icon_path("larrow.svg")))
+        )
         self.actionPrevious_Page.setText("Previous Page")
 
         # Action Next Page
         self.actionNext_Page = QtGui.QAction(self)
-        self.actionNext_Page.setIcon(QtGui.QIcon(util.icon_path("rarrow.svg")))
+        self.actionNext_Page.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.GoNext, QtGui.QIcon(util.icon_path("rarrow.svg"))))
         self.actionNext_Page.setText("Next Page")
         self.actionPrevious_Page.setShortcut("PgUp")
 
         # Action External Viewer
         self.actionOpen_External = QtGui.QAction(self)
-        self.actionOpen_External.setIcon(QtGui.QIcon(util.icon_path("pdf.svg")))
+        self.actionOpen_External.setIcon(QtGui.QIcon.fromTheme("viewpdf", QtGui.QIcon(util.icon_path("pdf.svg"))))
         self.actionOpen_External.setText("External Viewer")
         self.actionNext_Page.setShortcut("PgDown")
 
@@ -170,9 +172,9 @@ class PDFViewer(QtWidgets.QFrame):
         self.toolbar.addWidget(self.toolbarspacer2)
         self.toolbar.addAction(self.actionOpen_External)
 
-        self.m_pageSelector.valueChanged.connect(lambda n: self.page_selected(n-1))
+        self.m_pageSelector.valueChanged.connect(lambda n: self.page_selected(n - 1))
         nav = self.pdfView.pageNavigator()
-        nav.currentPageChanged.connect(lambda n: self.m_pageSelector.setValue(n+1))
+        nav.currentPageChanged.connect(lambda n: self.m_pageSelector.setValue(n + 1))
         self.m_pageSelector.setMinimum(1)
         # nav.backAvailableChanged.connect(self.actionBack.setEnabled)
         # nav.forwardAvailableChanged.connect(self.actionForward.setEnabled)
@@ -221,7 +223,7 @@ class PDFViewer(QtWidgets.QFrame):
             # scroll back to same point
             self.pdfView.verticalScrollBar().setValue(pos)
 
-            logger.debug("Reloaded from disk in {:.2f}ms.", (t2-t1)*1000)
+            logger.debug("Reloaded from disk in {:.2f}ms.", (t2 - t1) * 1000)
         else:
             logger.debug("Attempted to reload PDF but no valid file found at {!r}.", self.docpath)
 
@@ -253,7 +255,7 @@ class PDFViewer(QtWidgets.QFrame):
     def next_page_triggered(self):
         """Switch to next page."""
         nav = self.pdfView.pageNavigator()
-        nav.jump(min(nav.currentPage() + 1, self.pdfView.document().pageCount()-1), QtCore.QPointF(), nav.currentZoom())
+        nav.jump(min(nav.currentPage() + 1, self.pdfView.document().pageCount() - 1), QtCore.QPointF(), nav.currentZoom())
 
     @QtCore.Slot()
     def open_in_external_viewer(self):
