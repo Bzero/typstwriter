@@ -450,9 +450,21 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
         """Intercept, modify and forward keyPressEvent."""
-        # Replace tabs with spaces
-        if self.use_spaces and e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
-            e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Space, QtCore.Qt.NoModifier, "    ")
+        # Indent if Tab pressed
+        if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
+            if self.textCursor().hasSelection():
+                self.indent()
+            elif self.use_spaces:
+                self._insertTab(self.textCursor())
+            return
+
+        # Unindent if Shift+Tab pressed
+        if e.key() == QtCore.Qt.Key_Backtab and e.modifiers() == QtCore.Qt.ShiftModifier:
+            if self.textCursor().hasSelection():
+                self.unindent()
+            else:
+                self._remove_tab_l(self.textCursor())
+            return
 
         # Avoid inserting line break characters
         if e.key() == QtCore.Qt.Key_Return and e.modifiers() == QtCore.Qt.ShiftModifier:
@@ -471,6 +483,58 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.setExtraSelections([highlight])
         else:
             self.setExtraSelections([])
+
+    def _insert_tab(self, cursor):
+        """Insert a tab (or four spaces) right of the cursor."""
+        tab = "    " if self.use_spaces else "\t"
+        cursor.insertText(tab)
+
+    def _remove_tab_r(self, cursor):
+        """Remove a tab or up to four spaces right of the cursor."""
+        ntext = cursor.block().text()[cursor.positionInBlock() :: 1]
+        if ntext.startswith("\t"):
+            cursor.deleteChar()
+        else:
+            for c in ntext[0:4]:
+                if c != " ":
+                    break
+                cursor.deleteChar()
+
+    def _remove_tab_l(self, cursor):
+        """Remove a tab or up to four spaces left of the cursor."""
+        ntext = cursor.block().text()[cursor.positionInBlock() - 1 :: -1]
+        if ntext.startswith("\t"):
+            cursor.deletePreviousChar()
+        else:
+            for c in ntext[0:4]:
+                if c != " ":
+                    break
+                cursor.deletePreviousChar()
+
+    def indent(self):
+        """Indent the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            if cursor.block().text():
+                self._insert_tab(cursor)
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
+
+    def unindent(self):
+        """Unindent the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            self._remove_tab_r(cursor)
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
 
 
 class LineNumberWidget(QtWidgets.QWidget):
