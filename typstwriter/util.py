@@ -208,3 +208,17 @@ def icon_path(name):
     packagedir = os.path.dirname(__file__)
     path = os.path.join(packagedir, "icons", name)
     return path
+
+
+def selection_start_block(cursor):
+    """Return the block number of the selection start."""
+    c = QtGui.QTextCursor(cursor)
+    c.setPosition(cursor.selectionStart())
+    return c.blockNumber()
+
+
+def selection_end_block(cursor):
+    """Return the block number of the selection end."""
+    c = QtGui.QTextCursor(cursor)
+    c.setPosition(cursor.selectionEnd())
+    return c.blockNumber()
