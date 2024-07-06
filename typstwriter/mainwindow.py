@@ -152,6 +152,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Use default layout
         self.use_default_layout()
 
+        # Check if typst is available
+        QtCore.QTimer().singleShot(0, self.check_typst_availability)
+
         logger.info("Gui ready")
 
     def set_layout_typewriter(self):
@@ -230,3 +233,27 @@ class MainWindow(QtWidgets.QMainWindow):
             self.CompilerConnector.set_fin(main)
             self.CompilerConnector.set_fout(util.pdf_path(main))
             self.PDFWidget.open(util.pdf_path(main))
+
+    def check_typst_availability(self):
+        """Check if typst is available."""
+        if not util.typst_available():
+            logger.warning("The typst executable was not found.")
+
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+            msg_box.setWindowTitle("Typst not found")
+            msg_box.setText(
+                "The typst executable could not be found found:\nTypstwriter will not be able to compile documents."
+            )
+            msg_box.setInformativeText(
+                "Please install typst, make sure it was added to the 'PATH' environment variable \
+and check the typstwriter configuration file."
+            )
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ignore | QtWidgets.QMessageBox.StandardButton.Abort)
+            msg_box.setDefaultButton(QtWidgets.QMessageBox.StandardButton.Ignore)
+
+            match msg_box.exec():
+                case QtWidgets.QMessageBox.StandardButton.Ignore:
+                    pass
+                case QtWidgets.QMessageBox.StandardButton.Abort:
+                    self.close()

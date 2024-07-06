@@ -222,3 +222,21 @@ def selection_end_block(cursor):
     c = QtGui.QTextCursor(cursor)
     c.setPosition(cursor.selectionEnd())
     return c.blockNumber()
+
+
+def typst_available():
+    """Check if typst is available."""
+    expected_output = "The Typst compiler"
+    expected_exit_code = 2
+
+    process = QtCore.QProcess()
+    process.setProcessChannelMode(QtCore.QProcess.ProcessChannelMode.MergedChannels)
+    process.start(config.get("Compiler", "name"))
+    process.waitForFinished(msecs=100)
+    output = bytes(process.readAll()).decode("utf8")
+
+    return (
+        process.exitStatus() == QtCore.QProcess.NormalExit
+        and process.exitCode() == expected_exit_code
+        and expected_output in output
+    )
