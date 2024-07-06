@@ -150,15 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.showMaximized()
 
         # Use default layout
-        match config.get("General", "default_layout"):
-            case "typewriter":
-                self.actions.layout_typewriter.trigger()
-            case "editor_right":
-                self.actions.layout_editorR.trigger()
-            case "editor_left":
-                self.actions.layout_editorL.trigger()
-            case _:
-                self.actions.layout_typewriter.trigger()
+        self.use_default_layout()
 
         logger.info("Gui ready")
 
@@ -188,6 +180,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reorder widgets
         self.splitter.addWidget(self.Widgetidget)
         self.splitter.addWidget(self.Widgetidget_31)
+
+    def use_default_layout(self):
+        """Use the default layout set in the config."""
+        match config.get("General", "default_layout"):
+            case "typewriter":
+                self.actions.layout_typewriter.trigger()
+            case "editor_right":
+                self.actions.layout_editorR.trigger()
+            case "editor_left":
+                self.actions.layout_editorL.trigger()
+            case _:
+                self.actions.layout_typewriter.trigger()
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""
