@@ -188,12 +188,17 @@ class FSExplorer(QtWidgets.QWidget):
 
     def set_root(self, root):
         """Set the root directory of the FSExplorer."""
+        state.working_directory.Value = root
+        self.root_changed(root)
+
+    @QtCore.Slot(str)
+    def root_changed(self, root):
+        """Update root directory."""
         self.root = root
         self.filesystem_model.setRootPath(root)
         self.tree_view.setRootIndex(self.filesystem_model.index(root))
         self.completer_filesystem_model.setRootPath(root)
         self.pathBar.setText(root)
-        state.working_directory.Value = root
         logger.debug("Change Working Directory to {!r}.", root)
         # self.directoryChanged.emit(root)
 

@@ -46,9 +46,23 @@ class Editor(QtWidgets.QFrame):
         self.TabWidget.currentChanged.connect(self.tab_changed)
         state.working_directory.Signal.connect(self.update_tab_names)
 
+        self.TabWidget.tabBar().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.TabWidget.tabBar().customContextMenuRequested.connect(self.tab_bar_rightclicked)
+
         self.recentFiles = util.RecentFiles()
 
         self.welcome()
+
+    def tab_bar_rightclicked(self, event):
+        """Handle right click on the tab bar."""
+        tab_index = self.TabWidget.tabBar().tabAt(event)
+        tab = self.TabWidget.widget(tab_index)
+        if isinstance(tab, EditorPage):
+            cm = EditorPageBarContextMenu(self, tab_index)
+            cm.popup(QtGui.QCursor.pos())
+        elif isinstance(tab, WelcomePage):
+            cm = WelcomePageBarContextMenu(self, tab_index)
+            cm.popup(QtGui.QCursor.pos())
 
     def new_file(self):
         """Open a new, empty file."""
@@ -210,6 +224,55 @@ class Editor(QtWidgets.QFrame):
         page = self.TabWidget.widget(i)
         if page:
             self.active_file_changed.emit(page.path)
+
+
+class EditorPageBarContextMenu(QtWidgets.QMenu):
+    """ContextMenu for EditorPage tabbar."""
+
+    def __init__(self, parent, tab_index):
+        """Declare all actions."""
+        QtWidgets.QMenu.__init__(self, parent)
+
+        self.tab_index = tab_index
+
+        self.action_close = QtWidgets.QAction("Close file", triggered=self.handle_close)
+        self.action_use_as_main = QtWidgets.QAction("Use as main file", triggered=self.handle_use_as_main)
+        self.action_use_as_working_directory = QtWidgets.QAction(
+            "Use containing folder as working directory", triggered=self.handle_use_as_working_directory
+        )
+
+        self.addAction(self.action_close)
+        self.addAction(self.action_use_as_main)
+        self.addAction(self.action_use_as_working_directory)
+
+    def handle_close(self):
+        """Trigger closing the tab."""
+        self.parent().close_tab(self.tab_index)
+
+    def handle_use_as_main(self):
+        """Trigger using this file as main file."""
+        state.main_file.Value = self.parent().TabWidget.widget(self.tab_index).path
+
+    def handle_use_as_working_directory(self):
+        """Trigger using the folder containing this file as working directory."""
+        state.working_directory.Value = os.path.dirname(self.parent().TabWidget.widget(self.tab_index).path)
+
+
+class WelcomePageBarContextMenu(QtWidgets.QMenu):
+    """ContextMenu for WelcomePage tabbar."""
+
+    def __init__(self, parent, tab_index):
+        """Declare all actions."""
+        QtWidgets.QMenu.__init__(self, parent)
+
+        self.tab_index = tab_index
+
+        self.action_close = QtWidgets.QAction("Close Tab", triggered=self.handle_close)
+        self.addAction(self.action_close)
+
+    def handle_close(self):
+        """Trigger closing the tab."""
+        self.parent().close_tab(self.tab_index)
 
 
 class EditorPage(QtWidgets.QFrame):
