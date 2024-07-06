@@ -156,3 +156,18 @@ class TestTogglingAction:
 
         with qtbot.waitSignal(action.activated):
             action.trigger()
+
+
+def test_typst_available(monkeypatch):
+    """Test util.typst_available."""
+    monkeypatch.setattr(QtCore.QProcess, "start", lambda *args: None)
+    monkeypatch.setattr(QtCore.QProcess, "exitCode", lambda *args: 2)
+    monkeypatch.setattr(QtCore.QProcess, "exitStatus", lambda *args: QtCore.QProcess.ExitStatus.NormalExit)
+
+    # Typst available
+    monkeypatch.setattr(QtCore.QProcess, "readAll", lambda *args: b"The Typst compiler")
+    assert util.typst_available()
+
+    # Typst not available
+    monkeypatch.setattr(QtCore.QProcess, "readAll", lambda *args: b"Some other program")
+    assert not util.typst_available()
