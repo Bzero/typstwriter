@@ -135,6 +135,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.open_config.triggered.connect(self.open_config)
 
         self.FSExplorer.open_file.connect(self.editor.open_file)
+        state.working_directory.Signal.connect(self.FSExplorer.root_changed)
         self.editor.text_changed.connect(self.CompilerConnector.source_changed)
         self.CompilerConnector.document_changed.connect(self.PDFWidget.reload)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.stop())
