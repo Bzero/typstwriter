@@ -32,6 +32,7 @@ class FSContextMenu(QtWidgets.QMenu):
         self.context_path = None
 
         self.action_open = QtWidgets.QAction("Open", triggered=self.handle_open)
+        self.action_open_external = QtWidgets.QAction("Open with external program", triggered=self.handle_open_external)
         self.action_new_file = QtWidgets.QAction("New file", triggered=self.handle_new_file)
         self.action_new_folder = QtWidgets.QAction("New folder", triggered=self.handle_new_folder)
         self.action_rename = QtWidgets.QAction("Rename", triggered=self.handle_rename)
@@ -43,6 +44,10 @@ class FSContextMenu(QtWidgets.QMenu):
     def handle_open(self):
         """Trigger opening a file."""
         self.parent().open_file.emit(self.context_path)
+
+    def handle_open_external(self):
+        """Trigger opening a file."""
+        util.open_with_external_program(self.context_path)
 
     def handle_new_file(self):
         """Trigger creating a new file."""
@@ -92,6 +97,7 @@ class FileContextMenu(FSContextMenu):
         FSContextMenu.__init__(self, parent)
 
         self.addAction(self.action_open)
+        self.addAction(self.action_open_external)
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
         self.addAction(self.action_copy_path)
