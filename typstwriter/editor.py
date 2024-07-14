@@ -298,13 +298,19 @@ class EditorPage(QtWidgets.QFrame):
         self.edit = CodeEdit(
             highlight_synatx=syntax_conf, show_line_numbers=line_numbers_conf, highlight_line=line_conf, use_spaces=use_spaces
         )
+        self.edit.textChanged.connect(self.modified)
         self.verticalLayout.addWidget(self.edit)
 
-        self.edit.textChanged.connect(self.modified)
+        self.file_changed_warning = None
+
+        self.filesystemwatcher = QtCore.QFileSystemWatcher()
+        self.filesystemwatcher.fileChanged.connect(self.show_file_changed_warning)
 
         self.path = path
         self.issaved = True
         self.isloaded = False
+        self.changed_on_disk = False
+        self.justsaved = False
         if path:
             self.load(path)
 
@@ -319,6 +325,12 @@ class EditorPage(QtWidgets.QFrame):
             self.path = path
             self.pathchanged.emit(self.path)
             self.isloaded = True
+            self.changed_on_disk = False
+
+            self.filesystemwatcher.removePaths(self.filesystemwatcher.files())
+            self.filesystemwatcher.addPath(path)
+
+            self.savestatechanged.emit(self.issaved)
 
         except UnicodeError:
             msg = f"{path!r} is not a text file."
@@ -332,23 +344,40 @@ class EditorPage(QtWidgets.QFrame):
             self.show_error(msg)
             self.isloaded = False
 
-    def save(self):
-        """Save file."""
-        if not self.path:
-            return self.save_as()
-
+    def write(self):
+        """Write file to disk."""
         logger.info("Saving to: {!r}.", self.path)
 
         try:
             with open(self.path, "w") as f:
                 f.write(self.edit.document().toPlainText())
 
+            self.justsaved = True
             self.issaved = True
+            self.changed_on_disk = False
             self.savestatechanged.emit(self.issaved)
+
             return True
         except OSError:
             logger.info("Could not saved file {!r}", self.path)
             return False
+
+    def save(self):
+        """Save file."""
+        if not self.path:
+            return self.save_as()
+
+        if self.changed_on_disk:
+            ans = QtWidgets.QMessageBox.question(
+                self,
+                "Typstwriter",
+                f"File '{self.path}' was changed on disk.\nDo you really want to save this file and overwrite the one on disk?",
+            )
+            if ans == QtWidgets.QMessageBox.StandardButton.No:
+                return False
+
+        self.write()
+        return True
 
     def save_as(self):
         """Save file under a new name."""
@@ -356,8 +385,11 @@ class EditorPage(QtWidgets.QFrame):
 
         if os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK):
             self.path = path
-            self.save()
+            self.filesystemwatcher.removePaths(self.filesystemwatcher.files())
+            self.filesystemwatcher.addPath(path)
             self.pathchanged.emit(self.path)
+
+            self.write()
             return True
         else:
             logger.info("Attempted to save file but {!r} is not a valid path", path)
@@ -389,6 +421,34 @@ class EditorPage(QtWidgets.QFrame):
         self.issaved = False
         self.savestatechanged.emit(self.issaved)
 
+    @QtCore.Slot(str)
+    def show_file_changed_warning(self, path):
+        """Show the file changed warning."""
+        # Abort if the file was just saved before
+        if self.justsaved:
+            self.justsaved = False
+            return
+
+        self.changed_on_disk = True
+        if not self.file_changed_warning:
+            self.file_changed_warning = FileChangedWarning(path)
+            self.verticalLayout.insertWidget(0, self.file_changed_warning)
+            self.file_changed_warning.button_reload.pressed.connect(self.file_changed_reload)
+            self.file_changed_warning.button_ignore.pressed.connect(self.remove_file_changed_warning)
+
+    @QtCore.Slot()
+    def file_changed_reload(self):
+        """Reload the canged file from disk."""
+        self.load(self.path)
+        self.remove_file_changed_warning()
+
+    @QtCore.Slot()
+    def remove_file_changed_warning(self):
+        """Remove the file changed warning."""
+        self.verticalLayout.removeWidget(self.file_changed_warning)
+        self.file_changed_warning.deleteLater()
+        self.file_changed_warning = None
+
     def show_error(self, msg):
         """Show an error page."""
         self.edit.deleteLater()
@@ -411,6 +471,40 @@ class EditorPage(QtWidgets.QFrame):
         self.gridLayout.setColumnStretch(3, 1)
 
         self.verticalLayout.addLayout(self.gridLayout)
+
+
+class FileChangedWarning(QtWidgets.QFrame):
+    """Show a warning that the opened file changed on disk."""
+
+    def __init__(self, path):
+        """Init."""
+        QtWidgets.QFrame.__init__(self)
+        self.setFrameStyle(QtWidgets.QFrame.Shape.Box)
+
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
+
+        self.label_icon = QtWidgets.QLabel()
+        if QtGui.QIcon.hasThemeIcon(QtGui.QIcon.DialogWarning):
+            self.label_icon.setPixmap(QtGui.QIcon.fromTheme(QtGui.QIcon.DialogWarning).pixmap(self.fontMetrics().height() * 2))
+        else:
+            self.label_icon.setPixmap(
+                QtGui.QPixmap(util.icon_path("warning.svg")).scaledToHeight(self.fontMetrics().height() * 2)
+            )
+        self.horizontalLayout.addWidget(self.label_icon)
+
+        self.label_text = QtWidgets.QLabel()
+        self.label_text.setText(f"The file '{path!r}' has been changed on disk.")
+        self.horizontalLayout.addWidget(self.label_text)
+
+        icon = QtGui.QIcon.fromTheme(QtGui.QIcon.ViewRefresh, QtGui.QIcon(util.icon_path("reload.svg")))
+        self.button_reload = QtWidgets.QPushButton(icon, "Reload")
+        self.horizontalLayout.addWidget(self.button_reload)
+
+        icon = QtGui.QIcon.fromTheme("dialog-cancel", QtGui.QIcon(util.icon_path("ignore.svg")))
+        self.button_ignore = QtWidgets.QPushButton(icon, "Ignore")
+        self.horizontalLayout.addWidget(self.button_ignore)
+
+        self.horizontalLayout.setStretch(1, 1)
 
 
 class WelcomePage(QtWidgets.QFrame):
