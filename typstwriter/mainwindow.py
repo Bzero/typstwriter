@@ -211,8 +211,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_config(self):
         """Open config file."""
-        util.open_with_external_program(config.writepath)
         config.write()
+        util.open_with_external_program(config.writepath)
 
     def closeEvent(self, event):  # noqa: N802
         """Handle close event."""
