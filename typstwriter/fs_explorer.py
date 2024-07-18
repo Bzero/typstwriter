@@ -136,11 +136,18 @@ class FSExplorer(QtWidgets.QWidget):
         self.pathBar = QtWidgets.QLineEdit(self)
         self.pathBar.setText("")
         self.pathBar.editingFinished.connect(self.line_edited)
+
         self.folderAction = QtWidgets.QAction(
             QtGui.QIcon.fromTheme(QtGui.QIcon.FolderOpen, QtGui.QIcon(util.icon_path("folder.svg"))), "open"
         )
         self.folderAction.triggered.connect(self.open_directory_dialog)
         self.pathBar.addAction(self.folderAction, QtWidgets.QLineEdit.LeadingPosition)
+
+        self.parentAction = QtWidgets.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.GoUp, QtGui.QIcon(util.icon_path("parent_dir.svg"))), "up"
+        )
+        self.parentAction.triggered.connect(self.goto_parent_directory)
+        self.pathBar.addAction(self.parentAction, QtWidgets.QLineEdit.TrailingPosition)
 
         self.tree_view = QtWidgets.QTreeView()
         self.filesystem_model = QtWidgets.QFileSystemModel(self.tree_view)
@@ -178,7 +185,7 @@ class FSExplorer(QtWidgets.QWidget):
         root_dir = os.path.expanduser(config.get("General", "working_directory"))
         if not os.path.exists(root_dir):
             root_dir = os.path.expanduser("~/")
-        self.set_root(root_dir)
+        self.set_root(os.path.normpath(root_dir))
 
     def open_directory_dialog(self):
         """Open a dialog to select root path and open said path."""
@@ -226,6 +233,12 @@ class FSExplorer(QtWidgets.QWidget):
             self.open_file.emit(path)
         if os.path.isdir(path):
             self.set_root(path)
+
+    @QtCore.Slot()
+    def goto_parent_directory(self):
+        """Set the parent of the current directory as root."""
+        path = os.path.dirname(self.root)
+        self.set_root(path)
 
     def rightclicked(self, event):
         """Handle right click."""

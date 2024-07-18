@@ -52,6 +52,17 @@ class TestFSExplorer:
         assert fse.root == root
         assert fse.pathBar.text() == text
 
+    def test_goto_parent_directory(self, tmp_path, qtbot):
+        """Make sure the root can be set."""
+        fse = fs_explorer.FSExplorer()
+        qtbot.addWidget(fse)
+
+        path = tmp_path / "test_path"
+        path.mkdir()
+        fse.set_root(str(path))
+        fse.goto_parent_directory()
+        assert fse.root == str(tmp_path)
+
     def test_new_file(self, tmp_path, qtbot, caplog, monkeypatch):
         """Make sure a new file behaves correctly."""
         fse = fs_explorer.FSExplorer()
