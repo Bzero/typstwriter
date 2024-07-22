@@ -205,10 +205,12 @@ class Editor(QtWidgets.QFrame):
 
     @QtCore.Slot(str)
     def childpath_changed(self, path):
-        """Update tab name based on new path."""
+        """Update tab name and icon based on new path."""
         i = self.TabWidget.indexOf(self.sender())
         name = os.path.relpath(path, start=state.working_directory.Value)
+        icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
         self.TabWidget.tabBar().setTabText(i, name)
+        self.TabWidget.tabBar().setTabIcon(i, icon)
 
     @QtCore.Slot()
     def update_tab_names(self):
