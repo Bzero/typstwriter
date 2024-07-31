@@ -1,4 +1,4 @@
-# ![Typstwriter](docs/logo/Typstwriter_Text_Compact.svg)
+# ![Typstwriter](docs/logo/Typstwriter_Text_Compact_asPath.svg)
 
 An integrated editor for the [typst](https://github.com/typst/typst) typesetting system.
 
