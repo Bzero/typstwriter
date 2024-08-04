@@ -138,6 +138,8 @@ class MainWindow(QtWidgets.QMainWindow):
         state.working_directory.Signal.connect(self.FSExplorer.root_changed)
         self.editor.text_changed.connect(self.CompilerConnector.source_changed)
         self.CompilerConnector.document_changed.connect(self.PDFWidget.reload)
+        self.CompilerConnector.compilation_finished.connect(self.editor.clear_errors)
+        self.CompilerConnector.error_report.connect(self.editor.apply_errors)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.stop())
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))

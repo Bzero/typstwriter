@@ -3,6 +3,7 @@ from qtpy import QtCore
 from qtpy import QtWidgets
 
 import os
+import collections
 
 import superqt.utils
 import pygments
@@ -226,6 +227,20 @@ class Editor(QtWidgets.QFrame):
         page = self.TabWidget.widget(i)
         if page:
             self.active_file_changed.emit(page.path)
+
+    @QtCore.Slot(collections.defaultdict)
+    def apply_errors(self, errors):
+        """Apply all compiler errors."""
+        for t in self.tabs_list():
+            if t.path in errors:
+                t.edit.highlight_errors(errors[t.path])
+
+    @QtCore.Slot()
+    def clear_errors(self):
+        """Clear all compiler errors."""
+        for t in self.tabs_list():
+            if isinstance(t, EditorPage):
+                t.edit.clear_errors()
 
 
 class EditorPageBarContextMenu(QtWidgets.QMenu):
@@ -583,6 +598,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
         self.setPalette(palette)
 
+        self.line_highlight = []
+        self.error_highlight = []
+
         if not highlight_synatx:
             self.highlighter.setDocument(None)
             palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.formatter.style.styles[pygments.token.Token]))
@@ -636,6 +654,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         super().keyPressEvent(e)
 
+    def apply_extra_selections(self):
+        """Apply line highlight and error highlight extra selections."""
+        self.setExtraSelections(self.line_highlight + self.error_highlight)
+
     @QtCore.Slot()
     def highlight_current_line(self):
         """Highlight the current line, unless some text is selected."""
@@ -644,9 +666,46 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             highlight.format.setBackground(QtGui.QColor(self.highlighter.formatter.style.highlight_color))
             highlight.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
             highlight.cursor = self.textCursor()
-            self.setExtraSelections([highlight])
+            self.line_highlight = [highlight]
         else:
-            self.setExtraSelections([])
+            self.line_highlight = []
+
+        self.apply_extra_selections()
+
+    @QtCore.Slot()
+    def highlight_errors(self, errors):
+        """Highlight compiler errors."""
+        highlights = []
+        for e in errors:
+            (error, line, col, length) = e
+            # the error code is not currently used but it may be displayed in the editor in the future
+
+            cursor = QtGui.QTextCursor(self.document())
+            cursor.movePosition(QtGui.QTextCursor.MoveOperation.NextBlock, QtGui.QTextCursor.MoveMode.MoveAnchor, line - 1)
+            cursor.movePosition(QtGui.QTextCursor.MoveOperation.Right, QtGui.QTextCursor.MoveMode.MoveAnchor, col)
+            cursor.movePosition(QtGui.QTextCursor.MoveOperation.Right, QtGui.QTextCursor.MoveMode.KeepAnchor, length)
+
+            mark_line = QtWidgets.QTextEdit.ExtraSelection()
+            mark_line.format.setBackground(QtGui.QColor("#ffeeee"))
+            mark_line.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+            mark_line.cursor = cursor
+            mark_line.cursor.clearSelection()
+            highlights.append(mark_line)
+
+            mark_span = QtWidgets.QTextEdit.ExtraSelection()
+            mark_span.format.setUnderlineStyle(QtGui.QTextCharFormat.DashUnderline)
+            mark_span.format.setUnderlineColor("#cc1b1b")
+            mark_span.cursor = cursor
+            highlights.append(mark_span)
+
+        self.error_highlight = highlights
+        self.apply_extra_selections()
+
+    def clear_errors(self):
+        """Clear all error highlights."""
+        if self.error_highlight:
+            self.error_highlight = []
+            self.apply_extra_selections()
 
     def _insert_tab(self, cursor):
         """Insert a tab (or four spaces) right of the cursor."""
