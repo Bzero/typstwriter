@@ -2,6 +2,10 @@ import time
 
 from qtpy import QtCore
 
+import re
+import collections
+import os
+
 from typstwriter import enums
 
 from typstwriter import logging
@@ -16,6 +20,7 @@ state = globalstate.State
 text_compiling = "compiling ..."
 text_compiled_erroniously = "compiled with errors"
 text_compiled_successfully = "compiled successfully"
+error_regex = r"error:\s*(.*)\s*\n\s*┌─\s*(.*):(\d+):(\d+)\s*\n[^\^]*(\^*)"
 
 
 class CompilerConnector_FS(QtCore.QObject):  # noqa: N801
@@ -37,6 +42,7 @@ class CompilerConnector_FS(QtCore.QObject):  # noqa: N801
     compilation_started(): Emitted when the compilation starts.
     compilation_finished(): Emitted when compilation finishes(regardsless of success).
     document_changed(): Emitted when the output document has changed.
+    error_report(): Emitted when the compilation finishes with errors.
     new_stderr(str): Emitted when new stderr is available.
     new_stdout(str): Emitted when new stdout is available.
     """
@@ -46,6 +52,7 @@ class CompilerConnector_FS(QtCore.QObject):  # noqa: N801
     compilation_started = QtCore.Signal()
     compilation_finished = QtCore.Signal()
     document_changed = QtCore.Signal()
+    error_report = QtCore.Signal(collections.defaultdict)
     new_stderr = QtCore.Signal(str)
     new_stdout = QtCore.Signal(str)
 
@@ -86,6 +93,19 @@ class CompilerConnector_FS(QtCore.QObject):  # noqa: N801
         stderr = bytes(self.process.readAllStandardError()).decode("utf8")
         self.current_stderr += stderr
         self.new_stderr.emit(stderr)
+
+    def compilation_report(self, compiler_output):
+        """Extract compilation errors and locations and emit the error_report signal."""
+        match = re.findall(error_regex, compiler_output)
+        errors = collections.defaultdict(list)
+        for m in match:
+            try:
+                (error, fname, line, col, markers) = m
+                path = os.path.join(state.working_directory.Value, fname)
+                errors[path].append((error, int(line), int(col), len(markers)))
+            except ValueError:
+                logger.warning("Unknown compiler error message format encountered.")
+        self.error_report.emit(errors)
 
     @QtCore.Slot()
     def start(self):
@@ -176,16 +196,17 @@ class CompilerConnector_FS_onDemand(CompilerConnector_FS):  # noqa: N801
         self.compilation_finished.emit()
         self.stopped.emit()
 
-        self.current_stdout = None
-        self.current_stderr = None
-
-        self.process = None
-
         if exitcode == 0:
             logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t * 1000)
             self.document_changed.emit()
         else:
             logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t * 1000)
+            self.compilation_report(self.current_stderr)
+
+        self.current_stdout = None
+        self.current_stderr = None
+
+        self.process = None
 
     @QtCore.Slot()
     def check_recompilation(self):
@@ -283,14 +304,15 @@ class CompilerConnector_FS_live(CompilerConnector_FS):  # noqa: N801
             Δ_t = self.end_time - self.start_time  # noqa: N806
             logger.debug("Compiled {!r} with error in {:.2f}ms.", self.fin, Δ_t * 1000)
             self.compilation_finished.emit()
+            self.compilation_report(stderr)
 
         if text_compiled_successfully in stderr:
             self.end_time = time.time()
             # Δ_t = parse.search("compiled successfully in {:f}ms", stderr)[0]
             Δ_t = self.end_time - self.start_time  # noqa: N806
             logger.debug("Compiled {!r} successfully in {:.2f}ms.", self.fin, Δ_t * 1000)
-            self.document_changed.emit()
             self.compilation_finished.emit()
+            self.document_changed.emit()
 
 
 # TODO: This implementation is not optimal as it has a lot of repetition with CompilerConnector.
@@ -309,6 +331,7 @@ class WrappedCompilerConnector(QtCore.QObject):
     compilation_started = QtCore.Signal()
     compilation_finished = QtCore.Signal()
     document_changed = QtCore.Signal()
+    error_report = QtCore.Signal(collections.defaultdict)
     new_stderr = QtCore.Signal(str)
     new_stdout = QtCore.Signal(str)
 
@@ -355,6 +378,7 @@ class WrappedCompilerConnector(QtCore.QObject):
         self.CompilerConnector.compilation_started.connect(self.relay_compilation_started)
         self.CompilerConnector.compilation_finished.connect(self.relay_compilation_finished)
         self.CompilerConnector.document_changed.connect(self.relay_document_changed)
+        self.CompilerConnector.error_report.connect(self.relay_error_report)
         self.CompilerConnector.new_stderr.connect(self.relay_new_stderr)
         self.CompilerConnector.new_stdout.connect(self.relay_new_stdout)
 
@@ -365,6 +389,7 @@ class WrappedCompilerConnector(QtCore.QObject):
         self.CompilerConnector.compilation_started.disconnect(self.relay_compilation_started)
         self.CompilerConnector.compilation_finished.disconnect(self.relay_compilation_finished)
         self.CompilerConnector.document_changed.disconnect(self.relay_document_changed)
+        self.CompilerConnector.error_report.disconnect(self.relay_error_report)
         self.CompilerConnector.new_stderr.disconnect(self.relay_new_stderr)
         self.CompilerConnector.new_stdout.disconnect(self.relay_new_stdout)
 
@@ -412,6 +437,10 @@ class WrappedCompilerConnector(QtCore.QObject):
     def relay_document_changed(self):
         """Relay document_changed to compiler."""
         self.document_changed.emit()
+
+    def relay_error_report(self, list):
+        """Relay error_report to compiler."""
+        self.error_report.emit(list)
 
     def relay_new_stderr(self, stderr):
         """Relay new_stderr to compiler."""
