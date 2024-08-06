@@ -9,6 +9,7 @@ import superqt.utils
 import pygments
 
 from typstwriter import util
+from typstwriter import enums
 
 from typstwriter import logging
 from typstwriter import configuration
@@ -191,6 +192,14 @@ class Editor(QtWidgets.QFrame):
             page.edit.paste()
 
     @QtCore.Slot()
+    def search(self):
+        """Open the search bar of the active tab."""
+        page = self.TabWidget.currentWidget()
+        if isinstance(page, EditorPage):
+            page.search_bar.show()
+            # page.search_bar.edit_search.setFocus()
+
+    @QtCore.Slot()
     def childtext_changed(self):
         """Trigger textChanged."""
         self.text_changed.emit()
@@ -318,6 +327,10 @@ class EditorPage(QtWidgets.QFrame):
         self.edit.textChanged.connect(self.modified)
         self.verticalLayout.addWidget(self.edit)
 
+        self.search_bar = SearchBar(self)
+        self.verticalLayout.addWidget(self.search_bar)
+        self.search_bar.hide()
+
         self.file_changed_warning = None
 
         self.filesystemwatcher = QtCore.QFileSystemWatcher()
@@ -328,6 +341,7 @@ class EditorPage(QtWidgets.QFrame):
         self.isloaded = False
         self.changed_on_disk = False
         self.justsaved = False
+        self.any_match_found = False
         if path:
             self.load(path)
 
@@ -524,6 +538,124 @@ class FileChangedWarning(QtWidgets.QFrame):
         self.horizontalLayout.setStretch(1, 1)
 
 
+class SearchBar(QtWidgets.QWidget):
+    """A search and replace bar."""
+
+    def __init__(self, parent, path=None):
+        """Set up and load file if path is given."""
+        QtWidgets.QWidget.__init__(self, parent=parent)
+
+        self.Layout = QtWidgets.QGridLayout(self)
+        self.Layout.setContentsMargins(4, 4, 4, 4)
+
+        self.label_search = QtWidgets.QLabel("Search: ")
+        self.edit_search = QtWidgets.QLineEdit()
+
+        self.label_replace = QtWidgets.QLabel("Replace: ")
+        self.edit_replace = QtWidgets.QLineEdit()
+
+        self.label_mode = QtWidgets.QLabel("Mode: ")
+        self.combo_box_mode = QtWidgets.QComboBox()
+        self.combo_box_mode.addItem("Case Insensitive", enums.search_mode.case_insensitive)
+        self.combo_box_mode.addItem("Case Sensitive", enums.search_mode.case_sensitive)
+        self.combo_box_mode.addItem("Whole Words", enums.search_mode.whole_words)
+        self.combo_box_mode.addItem("Regular Expression", enums.search_mode.regex)
+
+        self.button_replace_current = QtWidgets.QPushButton("Replace Current")
+        self.button_replace_all = QtWidgets.QPushButton("Replace All")
+
+        self.button_close = QtWidgets.QToolButton()
+        self.button_close.setText("Close")
+        self.button_close.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.WindowClose, QtGui.QIcon(util.icon_path("close.svg"))))
+
+        self.button_prev = QtWidgets.QToolButton()
+        self.button_prev.setText("Previous Match")
+        self.button_prev.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.GoUp, QtGui.QIcon(util.icon_path("uarrow.svg"))))
+        self.button_next = QtWidgets.QToolButton()
+        self.button_next.setText("Next Match")
+        self.button_next.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.GoDown, QtGui.QIcon(util.icon_path("darrow.svg"))))
+
+        self.Layout.addWidget(self.label_search, 0, 0, 1, 1)
+        self.Layout.addWidget(self.edit_search, 0, 1, 1, 4)
+        self.Layout.addWidget(self.label_replace, 1, 0, 1, 1)
+        self.Layout.addWidget(self.edit_replace, 1, 1, 1, 4)
+        self.Layout.addWidget(self.label_mode, 2, 0, 1, 1)
+        self.Layout.addWidget(self.combo_box_mode, 2, 1, 1, 1)
+        self.Layout.setColumnStretch(2, 1)
+        self.Layout.addWidget(self.button_replace_current, 2, 3, 1, 1)
+        self.Layout.addWidget(self.button_replace_all, 2, 4, 1, 1)
+        self.Layout.addWidget(self.button_prev, 0, 5, 1, 1)
+        self.Layout.addWidget(self.button_next, 1, 5, 1, 1)
+        self.Layout.addWidget(self.button_close, 2, 5, 1, 1)
+
+        self.edit_search.textChanged.connect(self.find_all)
+        self.edit_search.returnPressed.connect(self.next_match)
+        self.combo_box_mode.currentIndexChanged.connect(self.find_all)
+        self.button_next.pressed.connect(self.next_match)
+        self.button_prev.pressed.connect(self.prev_match)
+        self.edit_replace.returnPressed.connect(self.replace_current)
+        self.button_replace_current.pressed.connect(self.replace_current)
+        self.button_replace_all.pressed.connect(self.replace_all)
+        self.button_close.pressed.connect(self.hide)
+        self.parent().edit.textChanged.connect(self.find_all_if_visible)
+
+    def show(self):
+        """Show the search bar."""
+        super().show()
+        self.edit_search.setFocus()
+        self.find_all()
+
+    def hide(self):
+        """Hide the search bar."""
+        super().hide()
+        self.parent().edit.clear_search_highlights()
+
+    def find_all(self):
+        """Find and highlight all occurencies of the query."""
+        if not self.isVisible():
+            return
+
+        self.parent().edit.highlight_all_matches(self.edit_search.text(), self.combo_box_mode.currentData())
+
+        palette = self.edit_search.palette()
+        if self.parent().edit.any_match_found:
+            palette.setColor(QtGui.QPalette.Base, QtGui.QColor("#90ee90"))
+        else:
+            palette.setColor(QtGui.QPalette.Base, QtGui.QColor("#ee9090"))
+        if not self.edit_search.text():
+            palette.setColor(QtGui.QPalette.Base, QtGui.QColor("#ffffff"))
+        self.edit_search.setPalette(palette)
+
+    def find_all_if_visible(self):
+        """Find all if search bar is visible."""
+        if self.isVisible():
+            self.find_all()
+
+    def next_match(self):
+        """Go to the next match."""
+        self.parent().edit.jump_to_match(
+            self.edit_search.text(), self.combo_box_mode.currentData(), enums.search_direction.next
+        )
+
+    def prev_match(self):
+        """Go to the previous match."""
+        self.parent().edit.jump_to_match(
+            self.edit_search.text(), self.combo_box_mode.currentData(), enums.search_direction.previous
+        )
+
+    def replace_current(self):
+        """Replace the currently selected match."""
+        self.parent().edit.replace_current_match(
+            self.edit_search.text(), self.combo_box_mode.currentData(), self.edit_replace.text()
+        )
+
+    def replace_all(self):
+        """Replace all matches."""
+        self.parent().edit.replace_all_matches(
+            self.edit_search.text(), self.combo_box_mode.currentData(), self.edit_replace.text()
+        )
+
+
 class WelcomePage(QtWidgets.QFrame):
     """Welcome Page."""
 
@@ -600,6 +732,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         self.line_highlight = []
         self.error_highlight = []
+        self.search_highlights = []
 
         if not highlight_synatx:
             self.highlighter.setDocument(None)
@@ -655,8 +788,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().keyPressEvent(e)
 
     def apply_extra_selections(self):
-        """Apply line highlight and error highlight extra selections."""
-        self.setExtraSelections(self.line_highlight + self.error_highlight)
+        """Apply line, error and search highlight extra selections."""
+        self.setExtraSelections(self.line_highlight + self.error_highlight + self.search_highlights)
 
     @QtCore.Slot()
     def highlight_current_line(self):
@@ -758,6 +891,105 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self._remove_tab_r(cursor)
             cursor.movePosition(QtGui.QTextCursor.NextBlock)
         cursor.endEditBlock()
+
+    def _find(self, query, mode, cursor, direction=enums.search_direction.next):
+        """Find the next/previous match from the provided cursor in the current document."""
+        doc = self.document()
+
+        match mode:
+            case enums.search_mode.case_insensitive:
+                options = QtGui.QTextDocument.FindFlags()
+            case enums.search_mode.case_sensitive:
+                options = QtGui.QTextDocument.FindFlag.FindCaseSensitively
+            case enums.search_mode.whole_words:
+                options = QtGui.QTextDocument.FindFlag.FindCaseSensitively | QtGui.QTextDocument.FindFlag.FindWholeWords
+            case enums.search_mode.regex:
+                query = QtCore.QRegularExpression(query)
+                options = QtGui.QTextDocument.FindFlag.FindCaseSensitively
+                if not query.isValid():
+                    return QtGui.QTextCursor()
+
+        if direction is enums.search_direction.previous:
+            options = options | QtGui.QTextDocument.FindFlag.FindBackward
+
+        return doc.find(query, cursor, options=options)
+
+    def highlight_all_matches(self, query, mode):
+        """Highlight all matches of the search query."""
+        highlights = []
+
+        cursor = QtGui.QTextCursor(self.document())
+
+        while not cursor.isNull() and not cursor.atEnd():
+            cursor = self._find(query, mode, cursor)
+
+            if not cursor.isNull():
+                if not cursor.hasSelection():
+                    cursor.movePosition(QtGui.QTextCursor.MoveOperation.Right)
+                    continue
+
+                highlight = QtWidgets.QTextEdit.ExtraSelection()
+                highlight.cursor = cursor
+                highlight.format.setBackground(QtGui.QColor(self.highlighter.formatter.style.highlight_color).darker(120))
+                highlights.append(highlight)
+
+        self.search_highlights = highlights
+        self.any_match_found = bool(highlights)
+
+        self.apply_extra_selections()
+
+    def clear_search_highlights(self):
+        """Clear all search highlights."""
+        self.search_highlights = []
+        self.any_match_found = False
+        self.apply_extra_selections()
+
+    def jump_to_match(self, query, mode, direction=enums.search_direction.next):
+        """Jump to the next/previous match of the search query."""
+        self.highlight_all_matches(query, mode)
+        if self.any_match_found:
+            cur = self._find(query, mode, self.textCursor(), direction)
+            if cur.isNull():  # Cursor is at the start or end of the document: wrap around
+                cur = QtGui.QTextCursor(self.document())
+                if direction is enums.search_direction.next:
+                    cur.movePosition(QtGui.QTextCursor.MoveOperation.Start)
+                else:
+                    cur.movePosition(QtGui.QTextCursor.MoveOperation.End)
+                cur = self._find(query, mode, cur, direction)
+
+            self.setTextCursor(cur)
+
+    def replace_all_matches(self, query, mode, replace_text):
+        """Replace all matches of the search query."""
+        cur = self.textCursor()
+        cur.beginEditBlock()
+
+        cursor = QtGui.QTextCursor(self.document())
+        while not cursor.isNull():
+            cursor = self._find(query, mode, cursor)
+            if not cursor.isNull():
+                cursor.removeSelectedText()
+                cursor.insertText(replace_text)
+
+        cur.endEditBlock()
+
+        self.highlight_all_matches(query, mode)
+
+    def replace_current_match(self, query, mode, replace_text):
+        """Replace current match of the search query."""
+        c = self.textCursor()
+        c.setPosition(c.anchor(), QtGui.QTextCursor.MoveMode.MoveAnchor)
+
+        cursor = self._find(query, mode, c)
+
+        if cursor == self.textCursor():
+            cursor.beginEditBlock()
+            cursor.removeSelectedText()
+            cursor.insertText(replace_text)
+            cursor.endEditBlock()
+
+        self.highlight_all_matches(query, mode)
+        self.jump_to_match(query, mode, direction=enums.search_direction.next)
 
 
 class LineNumberWidget(QtWidgets.QWidget):

@@ -73,7 +73,7 @@ class Actions(QtCore.QObject):
         self.paste.setText("Paste")
 
         self.search = QtWidgets.QAction(self)
-        self.search.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditFind, QtGui.QIcon(util.icon_path("quit.svg"))))
+        self.search.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditFind, QtGui.QIcon(util.icon_path("search.svg"))))
         self.search.setShortcut(QtGui.QKeySequence.Find)
         self.search.setText("Search")
 
