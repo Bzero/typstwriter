@@ -116,6 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.copy.triggered.connect(self.editor.copy)
         self.actions.cut.triggered.connect(self.editor.cut)
         self.actions.paste.triggered.connect(self.editor.paste)
+        self.actions.search.triggered.connect(self.editor.search)
         self.actions.layout_typewriter.triggered.connect(self.set_layout_typewriter)
         self.actions.layout_editorL.triggered.connect(self.set_layout_editorL)
         self.actions.layout_editorR.triggered.connect(self.set_layout_editorR)

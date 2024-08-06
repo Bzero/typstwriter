@@ -1,7 +1,45 @@
 from qtpy import QtCore
 from qtpy import QtGui
 
+import pytest
+
 from typstwriter import editor
+from typstwriter import enums
+
+search_data = [
+    (
+        "Fischers Fritz fischt frische Fische,\nfrische Fische fischt Fischers Fritz",
+        "Fisch",
+        enums.search_mode.case_insensitive,
+        [(0, 5), (15, 20), (30, 35), (46, 51), (53, 58), (60, 65)],
+        "_",
+        "_ers Fritz _t frische _e,\nfrische _e _t _ers Fritz",
+    ),
+    (
+        "Fischers Fritz fischt frische Fische,\nfrische Fische fischt Fischers Fritz",
+        "Fisch",
+        enums.search_mode.case_sensitive,
+        [(0, 5), (30, 35), (46, 51), (60, 65)],
+        "_",
+        "_ers Fritz fischt frische _e,\nfrische _e fischt _ers Fritz",
+    ),
+    (
+        "Fischers Fritz fischt frische Fische,\nfrische Fische fischt Fischers Fritz",
+        "Fische",
+        enums.search_mode.whole_words,
+        [(30, 36), (46, 52)],
+        "_",
+        "Fischers Fritz fischt frische _,\nfrische _ fischt Fischers Fritz",
+    ),
+    (
+        "Fischers Fritz fischt frische Fische,\nfrische Fische fischt Fischers Fritz",
+        r"\bFischers \w+\b",
+        enums.search_mode.regex,
+        [(0, 14), (60, 74)],
+        "_",
+        "_ fischt frische Fische,\nfrische Fische fischt _",
+    ),
+]
 
 
 class TestWelcomePage:
@@ -77,3 +115,21 @@ class TestCodeEdit:
         code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
         qtbot.keyPress(code_edit, QtCore.Qt.Key_Return, QtCore.Qt.ShiftModifier)
         assert code_edit.toPlainText() == "\n"
+
+    @pytest.mark.parametrize(("text", "query", "mode", "_spans", "replace_text", "result"), search_data)
+    def test_replace_all_matches(self, query, mode, text, replace_text, result, _spans):  # noqa PT019
+        """Test replace_all_matches() for all four query modes."""
+        code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
+        code_edit.insertPlainText(text)
+        code_edit.replace_all_matches(query, mode, replace_text)
+        assert code_edit.toPlainText() == result
+
+    @pytest.mark.parametrize(("text", "query", "mode", "spans", "_replace_text", "_result"), search_data)
+    def test_highlight_all_matches(self, query, mode, text, spans, _replace_text, _result):  # noqa PT019
+        """Test highlight_all_matches() for all four query modes."""
+        code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
+        code_edit.insertPlainText(text)
+        code_edit.highlight_all_matches(query, mode)
+        for selection, span in zip(code_edit.search_highlights, spans, strict=True):
+            assert selection.cursor.anchor() == span[0]
+            assert selection.cursor.position() == span[1]

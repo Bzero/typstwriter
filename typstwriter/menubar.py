@@ -52,6 +52,8 @@ class MenuBar(QtWidgets.QMenuBar):
         self.menuEdit.addAction(actions.copy)
         self.menuEdit.addAction(actions.cut)
         self.menuEdit.addAction(actions.paste)
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(actions.search)
 
         self.layout_menu = QtWidgets.QMenu(self)
         self.layout_menu.setTitle("Layout")
