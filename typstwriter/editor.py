@@ -358,7 +358,8 @@ class EditorPage(QtWidgets.QFrame):
             self.isloaded = True
             self.changed_on_disk = False
 
-            self.filesystemwatcher.removePaths(self.filesystemwatcher.files())
+            if self.filesystemwatcher.files():
+                self.filesystemwatcher.removePaths(self.filesystemwatcher.files())
             self.filesystemwatcher.addPath(path)
 
             self.savestatechanged.emit(self.issaved)
