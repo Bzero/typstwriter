@@ -94,13 +94,13 @@ class PDFViewer(QtWidgets.QFrame):
         self.actionZoom_In = QtGui.QAction(self)
         self.actionZoom_In.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomIn, QtGui.QIcon(util.icon_path("plus.svg"))))
         self.actionZoom_In.setText("Zoom In")
-        self.actionZoom_In.setShortcut("Ctrl++")
+        self.actionZoom_In.setShortcut(QtGui.QKeySequence.ZoomIn)
 
         # Action Zoom Out
         self.actionZoom_Out = QtGui.QAction(self)
         self.actionZoom_Out.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomOut, QtGui.QIcon(util.icon_path("minus.svg"))))
         self.actionZoom_Out.setText("Zoom Out")
-        self.actionZoom_Out.setShortcut("Ctrl+-")
+        self.actionZoom_Out.setShortcut(QtGui.QKeySequence.ZoomOut)
 
         # Action Previous Page
         self.actionPrevious_Page = QtGui.QAction(self)
