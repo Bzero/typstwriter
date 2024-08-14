@@ -171,3 +171,11 @@ def test_typst_available(monkeypatch):
     # Typst not available
     monkeypatch.setattr(QtCore.QProcess, "readAll", lambda *args: b"Some other program")
     assert not util.typst_available()
+
+
+def test_qstring_length():
+    """Test util.qstring_length."""
+    assert util.qstring_length("asdf") == 4  # noqa: PLR2004
+    assert util.qstring_length("Some\nText") == 9  # noqa: PLR2004
+    assert util.qstring_length("👍") == 2  # noqa: PLR2004
+    assert util.qstring_length('"Happy Birthday 🎉"') == 19  # noqa: PLR2004
