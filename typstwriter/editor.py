@@ -378,7 +378,7 @@ class EditorPage(QtWidgets.QFrame):
 
     def write(self):
         """Write file to disk."""
-        logger.info("Saving to: {!r}.", self.path)
+        logger.debug("Saving to: {!r}.", self.path)
 
         try:
             with open(self.path, "w") as f:
