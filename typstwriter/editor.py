@@ -5,11 +5,9 @@ from qtpy import QtWidgets
 import os
 import collections
 
-import superqt.utils
-import pygments
-
 from typstwriter import util
 from typstwriter import enums
+from typstwriter import syntax_highlighting
 
 from typstwriter import logging
 from typstwriter import configuration
@@ -755,7 +753,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().__init__()
 
         highlight_style = config.get("Editor", "highlighter_style")
-        self.highlighter = superqt.utils.CodeSyntaxHighlight(self.document(), "typst", highlight_style)
+        lexer = syntax_highlighting.get_lexer_by_name("Typst")
+        self.highlighter = syntax_highlighting.CodeSyntaxHighlight(self.document(), lexer, highlight_style)
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
         self.setPalette(palette)
@@ -769,7 +768,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         if not highlight_synatx:
             self.highlighter.setDocument(None)
-            palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.formatter.style.styles[pygments.token.Token]))
+            palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.font_color))
             self.setPalette(palette)
 
         if show_line_numbers:
@@ -835,7 +834,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """Highlight the current line, unless some text is selected."""
         if not self.textCursor().hasSelection():
             highlight = QtWidgets.QTextEdit.ExtraSelection()
-            highlight.format.setBackground(QtGui.QColor(self.highlighter.formatter.style.highlight_color))
+            highlight.format.setBackground(QtGui.QColor(self.highlighter.highlight_color))
             highlight.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
             highlight.cursor = self.textCursor()
             self.line_highlight = [highlight]
@@ -969,7 +968,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
                 highlight = QtWidgets.QTextEdit.ExtraSelection()
                 highlight.cursor = cursor
-                highlight.format.setBackground(QtGui.QColor(self.highlighter.formatter.style.highlight_color).darker(120))
+                highlight.format.setBackground(QtGui.QColor(self.highlighter.highlight_color).darker(120))
                 highlights.append(highlight)
 
         self.search_highlights = highlights
@@ -1046,12 +1045,10 @@ class LineNumberWidget(QtWidgets.QWidget):
         painter = QtGui.QPainter(self)
 
         # paint background
-        painter.fillRect(
-            event.rect(), QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_background_color)
-        )
+        painter.fillRect(event.rect(), QtGui.QColor(self.parentWidget().highlighter.line_number_background_color))
 
         # paint line numbers
-        painter.setPen(QtGui.QColor(self.parentWidget().highlighter.formatter.style.line_number_color))
+        painter.setPen(QtGui.QColor(self.parentWidget().highlighter.line_number_color))
         block = self.parentWidget().firstVisibleBlock()
 
         while block and block.isValid():

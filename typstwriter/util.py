@@ -240,3 +240,19 @@ def typst_available():
         and process.exitCode() == expected_exit_code
         and expected_output in output
     )
+
+
+def qstring_length(text):
+    """
+    Compute the length of a utf16-encoded QString.
+
+    This function was adopted from spyder: https://github.com/spyder-ide/spyder/blob/f3a0a762f81bf3bf78ed5b18a1f0dc97966249b6/spyder/utils/qstringhelpers.py
+    Original Copyright (c) Spyder Project Contributors, originally licensed under the MIT License.
+    """
+    utf16_text = text.encode("utf16")
+    length = len(utf16_text) // 2
+    # Remove Byte order mark.
+    # TODO: All unicode Non-characters should be removed
+    if utf16_text[:2] in [b"\xff\xfe", b"\xff\xff", b"\xfe\xff"]:
+        length -= 1
+    return length
