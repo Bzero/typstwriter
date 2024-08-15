@@ -485,24 +485,26 @@ class EditorPage(QtWidgets.QFrame):
         """Show an error page."""
         self.edit.deleteLater()
 
-        self.gridLayout = QtWidgets.QGridLayout()
+        self.HLayout = QtWidgets.QHBoxLayout()
+        self.verticalLayout.addLayout(self.HLayout)
 
         self.label_w = QtWidgets.QLabel()
         if QtGui.QIcon.hasThemeIcon("data-warning"):
             self.label_w.setPixmap(QtGui.QIcon.fromTheme("data-warning").pixmap(64))
         else:
             self.label_w.setPixmap(QtGui.QPixmap(util.icon_path("warning.svg")))
-        self.label_t = QtWidgets.QLabel("<h1>" + msg + "</h1>")
 
-        self.gridLayout.addWidget(self.label_w, 0, 1)
-        self.gridLayout.addWidget(self.label_t, 0, 2)
+        self.label_t = QtWidgets.QLabel(msg)
+        font = self.label_t.font()
+        font.setPointSize(font.pointSize() * 2)
+        font.setBold(True)
+        self.label_t.setFont(font)
+        self.label_t.setWordWrap(True)
 
-        self.gridLayout.setColumnStretch(0, 1)
-        self.gridLayout.setColumnStretch(1, 0)
-        self.gridLayout.setColumnStretch(2, 0)
-        self.gridLayout.setColumnStretch(3, 1)
-
-        self.verticalLayout.addLayout(self.gridLayout)
+        self.HLayout.addStretch()
+        self.HLayout.addWidget(self.label_w, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+        self.HLayout.addWidget(self.label_t, alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.HLayout.addStretch()
 
 
 class FileChangedWarning(QtWidgets.QFrame):
@@ -526,6 +528,7 @@ class FileChangedWarning(QtWidgets.QFrame):
 
         self.label_text = QtWidgets.QLabel()
         self.label_text.setText(f"The file '{path!r}' has been changed on disk.")
+        self.label_text.setWordWrap(True)
         self.horizontalLayout.addWidget(self.label_text)
 
         icon = QtGui.QIcon.fromTheme(QtGui.QIcon.ViewRefresh, QtGui.QIcon(util.icon_path("reload.svg")))
