@@ -90,10 +90,8 @@ class QTextCharFormatter(formatter.Formatter):
 
         `outfile` is needed from parent class, but is unused.
         """
-        data = []
         for token, value in tokensource:
-            data.append((self.token_map[token], util.qstring_length(value)))
-        return data
+            yield (self.token_map[token], util.qstring_length(value))
 
 
 class CodeSyntaxHighlight(QtGui.QSyntaxHighlighter):
