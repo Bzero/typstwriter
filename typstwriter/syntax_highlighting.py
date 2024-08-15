@@ -36,12 +36,20 @@ def get_lexer_name_by_filename(path):
 
     This is a simplified(but faster) alternative to pygments get_lexer_for_filename.
     """
+    if not path:
+        return None
+
     filename = os.path.basename(path)
     for name, _, filenames, _ in lexers.get_all_lexers(plugins=False):
         for f in filenames:
             if lexers._fn_matches(filename, f):
                 return name
     return None
+
+
+def available_lexers():
+    """Return a list with the names of all available lexers."""
+    return [name for name, _, _, _ in lexers.get_all_lexers(plugins=False)]
 
 
 class QTextCharFormatter(formatter.Formatter):

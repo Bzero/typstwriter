@@ -344,6 +344,7 @@ class EditorPage(QtWidgets.QFrame):
         line_numbers_conf = config.get("Editor", "show_line_numbers", "bool")
         line_conf = config.get("Editor", "highlight_line", "bool")
         use_spaces = config.get("Editor", "use_spaces", "bool")
+        syntax = syntax_highlighting.get_lexer_name_by_filename(path)
 
         self.edit = CodeEdit(
             font_size=font_size,
@@ -351,6 +352,7 @@ class EditorPage(QtWidgets.QFrame):
             show_line_numbers=line_numbers_conf,
             highlight_line=line_conf,
             use_spaces=use_spaces,
+            syntax=syntax,
         )
         self.edit.textChanged.connect(self.modified)
         self.verticalLayout.addWidget(self.edit)
@@ -359,10 +361,16 @@ class EditorPage(QtWidgets.QFrame):
         self.verticalLayout.addWidget(self.search_bar)
         self.search_bar.hide()
 
+        self.status_bar = EditorStatusBar(self)
+        self.status_bar.syntax_combo_box.setCurrentText(syntax if syntax and syntax_conf else "Text only")
+        self.verticalLayout.addWidget(self.status_bar)
+
         self.file_changed_warning = None
 
         self.filesystemwatcher = QtCore.QFileSystemWatcher()
         self.filesystemwatcher.fileChanged.connect(self.show_file_changed_warning)
+
+        self.status_bar.syntax_changed.connect(self.edit.set_syntax)
 
         self.path = path
         self.issaved = True
@@ -574,7 +582,7 @@ class SearchBar(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
         self.Layout = QtWidgets.QGridLayout(self)
-        self.Layout.setContentsMargins(4, 4, 4, 4)
+        self.Layout.setContentsMargins(4, 4, 0, 4)
 
         self.label_search = QtWidgets.QLabel("Search: ")
         self.edit_search = QtWidgets.QLineEdit()
@@ -684,6 +692,27 @@ class SearchBar(QtWidgets.QWidget):
         )
 
 
+class EditorStatusBar(QtWidgets.QWidget):
+    """A status bar for the editor."""
+
+    syntax_changed = QtCore.Signal(str)
+
+    def __init__(self, parent):
+        """Set up."""
+        QtWidgets.QWidget.__init__(self, parent=parent)
+
+        self.Layout = QtWidgets.QHBoxLayout(self)
+        self.Layout.setContentsMargins(4, 4, 0, 0)
+
+        self.syntax_combo_box = QtWidgets.QComboBox()
+        for name in sorted(syntax_highlighting.available_lexers(), key=str.lower):
+            self.syntax_combo_box.addItem(name)
+        self.syntax_combo_box.textActivated.connect(lambda text: self.syntax_changed.emit(text))
+
+        self.Layout.addStretch()
+        self.Layout.addWidget(self.syntax_combo_box)
+
+
 class WelcomePage(QtWidgets.QFrame):
     """Welcome Page."""
 
@@ -748,15 +777,18 @@ class WelcomePage(QtWidgets.QFrame):
 class CodeEdit(QtWidgets.QPlainTextEdit):
     """A code editor widget."""
 
-    def __init__(self, font_size=None, highlight_synatx=True, show_line_numbers=True, highlight_line=True, use_spaces=True):
+    def __init__(
+        self, font_size=None, highlight_synatx=True, show_line_numbers=True, highlight_line=True, use_spaces=True, syntax=None
+    ):
         """Init and set options."""
         super().__init__()
 
         highlight_style = config.get("Editor", "highlighter_style")
-        lexer = syntax_highlighting.get_lexer_by_name("Typst")
+        lexer = syntax_highlighting.get_lexer_by_name(syntax if highlight_synatx else None)
         self.highlighter = syntax_highlighting.CodeSyntaxHighlight(self.document(), lexer, highlight_style)
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(self.highlighter.background_color))
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.font_color))
         self.setPalette(palette)
 
         self.line_highlight = []
@@ -765,11 +797,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         if font_size:
             self.set_font_size(font_size)
-
-        if not highlight_synatx:
-            self.highlighter.setDocument(None)
-            palette.setColor(QtGui.QPalette.Text, QtGui.QColor(self.highlighter.font_color))
-            self.setPalette(palette)
 
         if show_line_numbers:
             self.line_numbers = LineNumberWidget(self)
@@ -824,6 +851,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         font = self.font()
         font.setPointSize(font_size)
         self.setFont(font)
+
+    def set_syntax(self, name):
+        """Set the syntax for syntax highlighting."""
+        with QtCore.QSignalBlocker(self):
+            highlight_style = config.get("Editor", "highlighter_style")
+            lexer = syntax_highlighting.get_lexer_by_name(name)
+            self.highlighter = syntax_highlighting.CodeSyntaxHighlight(self.document(), lexer, highlight_style)
+            self.highlighter.rehighlight()
 
     def apply_extra_selections(self):
         """Apply line, error and search highlight extra selections."""
