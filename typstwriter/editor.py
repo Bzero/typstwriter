@@ -53,6 +53,8 @@ class Editor(QtWidgets.QFrame):
 
         self.recentFiles = util.RecentFiles()
 
+        self.font_size = config.get("Editor", "font_size", typ="int")
+
         self.welcome()
 
     def tab_bar_rightclicked(self, event):
@@ -68,7 +70,7 @@ class Editor(QtWidgets.QFrame):
 
     def new_file(self):
         """Open a new, empty file."""
-        editorpage = EditorPage()
+        editorpage = EditorPage(font_size=self.font_size)
         name = "*new*"
         icon = QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentNew, QtGui.QIcon(util.icon_path("newFile.svg")))
         self.TabWidget.addTab(editorpage, icon, name)
@@ -82,7 +84,7 @@ class Editor(QtWidgets.QFrame):
     def open_file(self, path):
         """Open an existing file or switch to it if it is already open."""
         if path not in self.openfiles_list():
-            editorpage = EditorPage(path)
+            editorpage = EditorPage(path, self.font_size)
             name = os.path.relpath(path, start=state.working_directory.Value)
             icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
             self.TabWidget.addTab(editorpage, icon, name)
@@ -251,6 +253,30 @@ class Editor(QtWidgets.QFrame):
             if isinstance(t, EditorPage):
                 t.edit.clear_errors()
 
+    @QtCore.Slot()
+    def increase_font_size(self):
+        """Increase the font size."""
+        self.font_size = min(40, self.font_size * 1.25)
+        self.set_font_size()
+
+    @QtCore.Slot()
+    def decrease_font_size(self):
+        """Decrease the font size."""
+        self.font_size = max(4, self.font_size * 0.8)
+        self.set_font_size()
+
+    @QtCore.Slot()
+    def reset_font_size(self):
+        """Reset the font size to the config default."""
+        self.font_size = config.get("Editor", "font_size", typ="int")
+        self.set_font_size()
+
+    def set_font_size(self):
+        """Apply font size to all editor tabs."""
+        for t in self.tabs_list():
+            if isinstance(t, EditorPage):
+                t.edit.set_font_size(self.font_size)
+
 
 class EditorPageBarContextMenu(QtWidgets.QMenu):
     """ContextMenu for EditorPage tabbar."""
@@ -307,7 +333,7 @@ class EditorPage(QtWidgets.QFrame):
     savestatechanged = QtCore.Signal(bool)
     pathchanged = QtCore.Signal(str)
 
-    def __init__(self, path=None):
+    def __init__(self, path=None, font_size=None):
         """Set up and load file if path is given."""
         QtWidgets.QFrame.__init__(self)
         self.setFrameStyle(QtWidgets.QFrame.Shape.StyledPanel)
@@ -322,7 +348,11 @@ class EditorPage(QtWidgets.QFrame):
         use_spaces = config.get("Editor", "use_spaces", "bool")
 
         self.edit = CodeEdit(
-            highlight_synatx=syntax_conf, show_line_numbers=line_numbers_conf, highlight_line=line_conf, use_spaces=use_spaces
+            font_size=font_size,
+            highlight_synatx=syntax_conf,
+            show_line_numbers=line_numbers_conf,
+            highlight_line=line_conf,
+            use_spaces=use_spaces,
         )
         self.edit.textChanged.connect(self.modified)
         self.verticalLayout.addWidget(self.edit)
@@ -724,7 +754,7 @@ class WelcomePage(QtWidgets.QFrame):
 class CodeEdit(QtWidgets.QPlainTextEdit):
     """A code editor widget."""
 
-    def __init__(self, highlight_synatx=True, show_line_numbers=True, highlight_line=True, use_spaces=True):
+    def __init__(self, font_size=None, highlight_synatx=True, show_line_numbers=True, highlight_line=True, use_spaces=True):
         """Init and set options."""
         super().__init__()
 
@@ -737,6 +767,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.line_highlight = []
         self.error_highlight = []
         self.search_highlights = []
+
+        if font_size:
+            self.set_font_size(font_size)
 
         if not highlight_synatx:
             self.highlighter.setDocument(None)
@@ -790,6 +823,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier, "\r")
 
         super().keyPressEvent(e)
+
+    def set_font_size(self, font_size):
+        """Set the font size."""
+        font = self.font()
+        font.setPointSize(font_size)
+        self.setFont(font)
 
     def apply_extra_selections(self):
         """Apply line, error and search highlight extra selections."""

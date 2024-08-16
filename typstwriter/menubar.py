@@ -59,11 +59,19 @@ class MenuBar(QtWidgets.QMenuBar):
         self.layout_menu.setTitle("Layout")
         self.layout_menu.addActions(actions.layout.actions())
 
+        self.editor_zoom_menu = QtWidgets.QMenu(self)
+        self.editor_zoom_menu.setTitle("Editor Zoom")
+        self.editor_zoom_menu.addAction(actions.font_size_up)
+        self.editor_zoom_menu.addAction(actions.font_size_dn)
+        self.editor_zoom_menu.addAction(actions.font_size_reset)
+
         self.menuView.addMenu(self.layout_menu)
         self.menuView.addSeparator()
         self.menuView.addAction(actions.show_fs_explorer)
         self.menuView.addAction(actions.show_compiler_options)
         self.menuView.addAction(actions.show_compiler_output)
+        self.menuView.addSeparator()
+        self.menuView.addMenu(self.editor_zoom_menu)
 
         self.menuSettings.addAction(actions.open_config)
 

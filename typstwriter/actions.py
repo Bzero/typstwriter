@@ -77,6 +77,18 @@ class Actions(QtCore.QObject):
         self.search.setShortcut(QtGui.QKeySequence.Find)
         self.search.setText("Search")
 
+        self.font_size_up = QtWidgets.QAction(self)
+        self.font_size_up.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomIn, QtGui.QIcon(util.icon_path("plus.svg"))))
+        self.font_size_up.setText("Increase Font Size")
+
+        self.font_size_dn = QtWidgets.QAction(self)
+        self.font_size_dn.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomOut, QtGui.QIcon(util.icon_path("minus.svg"))))
+        self.font_size_dn.setText("Decrease Font Size")
+
+        self.font_size_reset = QtWidgets.QAction(self)
+        self.font_size_reset.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ZoomFitBest))
+        self.font_size_reset.setText("Reset Font Size")
+
         self.layout_typewriter = QtWidgets.QAction(self)
         self.layout_typewriter.setIcon(QtGui.QIcon.fromTheme("view-split-top-bottom-symbolic"))
         self.layout_typewriter.setText("Layout: Typewriter")
