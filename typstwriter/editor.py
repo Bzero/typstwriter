@@ -519,10 +519,10 @@ class EditorPage(QtWidgets.QFrame):
 
     def show_error(self, msg):
         """Show an error page."""
-        self.edit.deleteLater()
+        self.edit.hide()
 
         self.HLayout = QtWidgets.QHBoxLayout()
-        self.verticalLayout.addLayout(self.HLayout)
+        self.verticalLayout.insertLayout(1, self.HLayout)
 
         self.label_w = QtWidgets.QLabel()
         if QtGui.QIcon.hasThemeIcon("data-warning"):
@@ -704,6 +704,8 @@ class EditorStatusBar(QtWidgets.QWidget):
     def __init__(self, parent):
         """Set up."""
         QtWidgets.QWidget.__init__(self, parent=parent)
+
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Maximum)
 
         self.Layout = QtWidgets.QHBoxLayout(self)
         self.Layout.setContentsMargins(4, 4, 0, 0)
