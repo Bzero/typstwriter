@@ -30,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("Typstwriter")
         self.setObjectName("MainWindow")
-        self.setWindowIcon(QtGui.QIcon(util.icon_path("typstwriter.png")))
+        self.setWindowIcon(QtGui.QIcon(util.icon_path("typstwriter.svg")))
 
         # Actions
         self.actions = actions.Actions(self)
