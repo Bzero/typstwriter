@@ -123,9 +123,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.font_size_up.triggered.connect(self.editor.increase_font_size)
         self.actions.font_size_dn.triggered.connect(self.editor.decrease_font_size)
         self.actions.font_size_reset.triggered.connect(self.editor.reset_font_size)
-        self.actions.show_fs_explorer.triggered.connect(self.set_fs_explorer_visibility)
-        self.actions.show_compiler_options.triggered.connect(self.set_compiler_options_visibility)
-        self.actions.show_compiler_output.triggered.connect(self.set_compiler_output_visibility)
+        self.actions.show_fs_explorer.toggled.connect(self.set_fs_explorer_visibility)
+        self.actions.show_compiler_options.toggled.connect(self.set_compiler_options_visibility)
+        self.actions.show_compiler_output.toggled.connect(self.set_compiler_output_visibility)
         self.actions.show_fs_explorer.setChecked(True)
         self.actions.show_compiler_options.setChecked(True)
         self.actions.show_compiler_output.setChecked(True)
@@ -192,8 +192,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.Widgetidget_31)
 
     def use_default_layout(self):
-        """Use the default layout set in the config."""
-        match config.get("General", "default_layout"):
+        """Adjust the layout set in the config."""
+        match config.get("Layout", "default_layout"):
             case "typewriter":
                 self.actions.layout_typewriter.trigger()
             case "editor_right":
@@ -202,6 +202,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.actions.layout_editorL.trigger()
             case _:
                 self.actions.layout_typewriter.trigger()
+
+        self.actions.show_fs_explorer.setChecked(config.get("Layout", "show_fs_explorer", typ="bool"))
+        self.actions.show_compiler_options.setChecked(config.get("Layout", "show_compiler_options", typ="bool"))
+        self.actions.show_compiler_output.setChecked(config.get("Layout", "show_compiler_output", typ="bool"))
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""
