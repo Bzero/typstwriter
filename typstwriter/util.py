@@ -110,6 +110,7 @@ class RecentFiles(QtCore.QObject):
     def write(self):
         """Write the list of recently used files to disk."""
         try:
+            os.makedirs(os.path.dirname(self.path), exist_ok=True)
             with open(self.path, "w") as f:
                 for line in self.recent_files:
                     f.write(line + "\n")
