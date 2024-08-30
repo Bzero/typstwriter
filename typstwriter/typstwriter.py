@@ -14,7 +14,13 @@ def main():
 
     logging.setup_logger(os.environ.get("LOGLEVEL"))
     logger = logging.getLogger(__name__)
+    logger.debug("Logging initialized")
 
+    # Parse Arguments
+    logger.debug("Parse Arguments")
+    from typstwriter import arguments  # noqa: F401
+
+    # Start Typstwriter
     logger.info("Typstwriter started")
 
     # Initialise Config

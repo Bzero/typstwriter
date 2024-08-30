@@ -15,10 +15,12 @@ from typstwriter import util
 from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
+from typstwriter import arguments
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
 state = globalstate.State
+args = arguments.Args
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -158,6 +160,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Use default layout
         self.use_default_layout()
+
+        # Open files if given as arguments
+        for file in args.files:
+            self.editor.open_file(file)
 
         # Check if typst is available
         QtCore.QTimer().singleShot(0, self.check_typst_availability)
