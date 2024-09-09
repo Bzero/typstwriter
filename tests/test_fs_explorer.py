@@ -146,30 +146,29 @@ class TestFSExplorer:
         assert from_path.exists()
         assert to_path.exists()
 
-    # tmp_path creates a directory in /tmp where send2trash has no permission
-    # def test_delete(self, tmp_path, qtbot, monkeypatch):
-    #     """Make sure a folder or file can be deleted."""
-    #     fse = fs_explorer.FSExplorer()
-    #     qtbot.addWidget(fse)
-    #
-    #     folder_path = tmp_path / "test_folder"
-    #     file_path = tmp_path / "test_file.dat"
-    #
-    #     folder_path.mkdir()
-    #     file_path.touch()
-    #     assert file_path.exists()
-    #     assert folder_path.exists()
-    #
-    #     # Decline deletion
-    #     monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *args: QtWidgets.QMessageBox.StandardButton.No)
-    #     fse.delete(str(folder_path))
-    #     fse.delete(str(file_path))
-    #     assert file_path.exists()
-    #     assert folder_path.exists()
-    #
-    #     # Accept deletion
-    #     monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *args: QtWidgets.QMessageBox.StandardButton.Yes)
-    #     fse.delete(str(folder_path))
-    #     fse.delete(str(file_path))
-    #     assert not file_path.exists()
-    #     assert not folder_path.exists()
+    def test_delete(self, tmp_path, qtbot, monkeypatch):
+        """Make sure a folder or file can be deleted."""
+        fse = fs_explorer.FSExplorer()
+        qtbot.addWidget(fse)
+
+        folder_path = tmp_path / "test_folder"
+        file_path = tmp_path / "test_file.dat"
+
+        folder_path.mkdir()
+        file_path.touch()
+        assert file_path.exists()
+        assert folder_path.exists()
+
+        # Decline deletion
+        monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *args: QtWidgets.QMessageBox.StandardButton.No)
+        fse.delete(str(folder_path))
+        fse.delete(str(file_path))
+        assert file_path.exists()
+        assert folder_path.exists()
+
+        # Accept deletion
+        monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *args: QtWidgets.QMessageBox.StandardButton.Yes)
+        fse.delete(str(folder_path))
+        fse.delete(str(file_path))
+        assert not file_path.exists()
+        assert not folder_path.exists()
