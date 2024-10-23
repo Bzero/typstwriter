@@ -3,6 +3,7 @@ from qtpy import QtCore
 from qtpy import QtWidgets
 
 import os
+import shutil
 
 from typstwriter import util
 
@@ -37,6 +38,8 @@ class FSContextMenu(QtWidgets.QMenu):
         self.action_delete = QtWidgets.QAction("Delete", triggered=self.handle_delete)
         self.setRoot = QtWidgets.QAction("Set as Working Directory", triggered=self.handle_set_root)
         self.action_copy_path = QtWidgets.QAction("Copy path", triggered=self.handle_copy_path)
+        self.action_copy = QtWidgets.QAction("Copy", triggered=self.handle_copy)
+        self.action_paste = QtWidgets.QAction("Paste", triggered=self.handle_paste)
         self.action_main_file = QtWidgets.QAction("Set as main file", triggered=self.handle_set_as_main_file)
 
     def handle_open(self):
@@ -71,6 +74,22 @@ class FSContextMenu(QtWidgets.QMenu):
         """Trigger copying path to the clipboard."""
         QtGui.QGuiApplication.clipboard().setText(self.context_path)
 
+    def handle_copy(self):
+        """Trigger copying file or folder to the clipboard."""
+        mime_data = QtCore.QMimeData()
+        mime_data.setUrls([QtCore.QUrl.fromLocalFile(self.context_path)])
+        QtGui.QGuiApplication.clipboard().setMimeData(mime_data)
+
+    def handle_paste(self):
+        """Trigger pasting from the clipboard."""
+        mime_data = QtGui.QGuiApplication.clipboard().mimeData()
+
+        if mime_data.hasFormat("text/uri-list"):
+            for uri in mime_data.data("text/uri-list").data().decode().split():
+                fs = QtCore.QUrl(uri).toLocalFile()
+                if os.path.exists(fs):
+                    self.parent().copy(fs, self.context_path)
+
     def handle_set_as_main_file(self):
         """Trigger setting the current file as main file."""
         state.main_file.Value = self.context_path
@@ -85,6 +104,7 @@ class NoItemContextMenu(FSContextMenu):
 
         self.addAction(self.action_new_file)
         self.addAction(self.action_new_folder)
+        self.addAction(self.action_paste)
 
 
 class FileContextMenu(FSContextMenu):
@@ -98,6 +118,7 @@ class FileContextMenu(FSContextMenu):
         self.addAction(self.action_open_external)
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
+        self.addAction(self.action_copy)
         self.addAction(self.action_copy_path)
         self.addAction(self.action_main_file)
 
@@ -111,6 +132,9 @@ class FolderContextMenu(FSContextMenu):
 
         self.addAction(self.action_new_file)
         self.addAction(self.action_new_folder)
+        self.addAction(self.action_copy)
+        self.addAction(self.action_copy_path)
+        self.addAction(self.action_paste)
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
         self.addAction(self.setRoot)
@@ -316,6 +340,27 @@ class FSExplorer(QtWidgets.QWidget):
         else:
             logger.warning("{!r} already exists. Will not overwrite.", path_to)
             QtWidgets.QMessageBox.warning(self, "Typstwriter", f"'{path_to}' already exists.\nWill not overwrite.")
+
+    def copy(self, path_from, path_to, overwrite=False):
+        """Copy a file or folder from path_from into the directory path_to."""
+        if not os.path.isdir(path_to):
+            return
+
+        if not os.path.exists(path_from):
+            return
+
+        head, tail = os.path.split(path_from)
+        path_to = os.path.join(path_to, tail)
+
+        if not overwrite and os.path.exists(path_to):
+            logger.warning("{!r} already exists. Will not overwrite.", path_to)
+            QtWidgets.QMessageBox.warning(self, "Typstwriter", f"'{path_to}' already exists.\nWill not overwrite.")
+            return
+
+        if os.path.isdir(path_from):
+            shutil.copytree(path_from, path_to, dirs_exist_ok=overwrite)
+        else:
+            shutil.copy2(path_from, path_to)
 
     def delete(self, path):
         """Delete a folder or file."""
