@@ -65,11 +65,13 @@ class Actions(QtCore.QObject):
         self.copy = QtWidgets.QAction(self)
         self.copy.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditCopy, QtGui.QIcon(util.icon_path("copy.svg"))))
         self.copy.setShortcut(QtGui.QKeySequence.Copy)
+        self.copy.setShortcutContext(QtCore.Qt.WidgetWithChildrenShortcut)
         self.copy.setText("Copy")
 
         self.paste = QtWidgets.QAction(self)
         self.paste.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.EditPaste, QtGui.QIcon(util.icon_path("paste.svg"))))
         self.paste.setShortcut(QtGui.QKeySequence.Paste)
+        self.paste.setShortcutContext(QtCore.Qt.WidgetWithChildrenShortcut)
         self.paste.setText("Paste")
 
         self.search = QtWidgets.QAction(self)

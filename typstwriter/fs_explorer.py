@@ -3,6 +3,7 @@ from qtpy import QtCore
 from qtpy import QtWidgets
 
 import os
+import shutil
 
 from typstwriter import util
 
@@ -37,6 +38,8 @@ class FSContextMenu(QtWidgets.QMenu):
         self.action_delete = QtWidgets.QAction("Delete", triggered=self.handle_delete)
         self.setRoot = QtWidgets.QAction("Set as Working Directory", triggered=self.handle_set_root)
         self.action_copy_path = QtWidgets.QAction("Copy path", triggered=self.handle_copy_path)
+        self.action_copy = QtWidgets.QAction("Copy", triggered=self.handle_copy)
+        self.action_paste = QtWidgets.QAction("Paste", triggered=self.handle_paste)
         self.action_main_file = QtWidgets.QAction("Set as main file", triggered=self.handle_set_as_main_file)
 
     def handle_open(self):
@@ -71,6 +74,14 @@ class FSContextMenu(QtWidgets.QMenu):
         """Trigger copying path to the clipboard."""
         QtGui.QGuiApplication.clipboard().setText(self.context_path)
 
+    def handle_copy(self):
+        """Trigger copying file or folder to the clipboard."""
+        self.parent().copy_to_clipboard(self.context_path)
+
+    def handle_paste(self):
+        """Trigger pasting from the clipboard."""
+        self.parent().paste_from_clipboard(self.context_path)
+
     def handle_set_as_main_file(self):
         """Trigger setting the current file as main file."""
         state.main_file.Value = self.context_path
@@ -85,6 +96,7 @@ class NoItemContextMenu(FSContextMenu):
 
         self.addAction(self.action_new_file)
         self.addAction(self.action_new_folder)
+        self.addAction(self.action_paste)
 
 
 class FileContextMenu(FSContextMenu):
@@ -98,6 +110,7 @@ class FileContextMenu(FSContextMenu):
         self.addAction(self.action_open_external)
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
+        self.addAction(self.action_copy)
         self.addAction(self.action_copy_path)
         self.addAction(self.action_main_file)
 
@@ -111,9 +124,23 @@ class FolderContextMenu(FSContextMenu):
 
         self.addAction(self.action_new_file)
         self.addAction(self.action_new_folder)
+        self.addAction(self.action_copy)
+        self.addAction(self.action_copy_path)
+        self.addAction(self.action_paste)
         self.addAction(self.action_rename)
         self.addAction(self.action_delete)
         self.addAction(self.setRoot)
+
+
+class SelectionContextMenu(FSContextMenu):
+    """Context menu when clicking on a selection."""
+
+    def __init__(self, parent):
+        """Assemble Menu."""
+        FSContextMenu.__init__(self, parent)
+
+        self.addAction(self.action_delete)
+        self.addAction(self.action_copy)
 
 
 class FSExplorer(QtWidgets.QWidget):
@@ -152,6 +179,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.filesystem_model.setIconProvider(util.FileIconProvider())
         self.tree_view.setModel(self.filesystem_model)
         self.tree_view.setRootIsDecorated(True)
+        self.tree_view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.tree_view.hideColumn(1)
         self.tree_view.hideColumn(2)
         self.tree_view.header().setSectionsMovable(False)
@@ -178,6 +206,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.NoItemContextMenu = NoItemContextMenu(self)
         self.FileContextMenu = FileContextMenu(self)
         self.FolderContextMenu = FolderContextMenu(self)
+        self.SelectionContextMenu = SelectionContextMenu(self)
 
         # Set initial state
         root_dir = os.path.expanduser(config.get("General", "working_directory"))
@@ -243,12 +272,19 @@ class FSExplorer(QtWidgets.QWidget):
         index = self.tree_view.indexAt(event)
         if not index.isValid():
             self.open_no_item_menu()
+            return
         else:
+            selected_indices = self.tree_view.selectionModel().selectedRows()
+            if index in selected_indices and len(selected_indices) > 1:
+                self.open_selection_menu(index)
+                return
             path = self.filesystem_model.filePath(index)
             if os.path.isfile(path):
                 self.open_file_menu(index)
+                return
             if os.path.isdir(path):
                 self.open_folder_menu(index)
+                return
 
     def open_no_item_menu(self):
         """Open context menu when clicking on no item."""
@@ -267,6 +303,31 @@ class FSExplorer(QtWidgets.QWidget):
         path = self.filesystem_model.filePath(index)
         self.FileContextMenu.context_path = path
         self.FileContextMenu.popup(QtGui.QCursor.pos())
+
+    def open_selection_menu(self, index):
+        """Open context menu when clicking on a selection."""
+        paths = self.selected_paths()
+        self.SelectionContextMenu.context_path = paths
+        self.SelectionContextMenu.popup(QtGui.QCursor.pos())
+
+    def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
+        """Intercept keyPressEvent."""
+        if e.key() == QtCore.Qt.Key_Delete and e.modifiers() == QtCore.Qt.NoModifier:
+            self.delete(self.selected_paths())
+        if e.key() == QtCore.Qt.Key_C and e.modifiers() == QtCore.Qt.ControlModifier:
+            self.copy_to_clipboard(self.selected_paths())
+        if e.key() == QtCore.Qt.Key_V and e.modifiers() == QtCore.Qt.ControlModifier:
+            self.paste_from_clipboard(self.filesystem_model.rootPath())
+        super().keyPressEvent(e)
+
+    def selected_paths(self):
+        """Return the paths of the currently selected items."""
+        selected_paths = []
+        for index in self.tree_view.selectionModel().selectedRows():
+            if index.isValid():
+                path = self.filesystem_model.filePath(index)
+                selected_paths.append(path)
+        return selected_paths
 
     # TODO: Possibly move the functions below to an own class or module as they dont directly relate to the FSExplorer
     def new_file_in_dir(self, head_path):
@@ -317,10 +378,57 @@ class FSExplorer(QtWidgets.QWidget):
             logger.warning("{!r} already exists. Will not overwrite.", path_to)
             QtWidgets.QMessageBox.warning(self, "Typstwriter", f"'{path_to}' already exists.\nWill not overwrite.")
 
-    def delete(self, path):
+    def copy_to_clipboard(self, paths):
+        """Copy a list of files or foler to the clipboard."""
+        if not isinstance(paths, list):
+            paths = [paths]
+
+        urls = [QtCore.QUrl.fromLocalFile(path) for path in paths if os.path.exists(path)]
+
+        if urls:
+            mime_data = QtCore.QMimeData()
+            mime_data.setUrls(urls)
+            QtGui.QGuiApplication.clipboard().setMimeData(mime_data)
+
+    def paste_from_clipboard(self, path):
+        """Paste a file or folder from cliboard into path."""
+        mime_data = QtGui.QGuiApplication.clipboard().mimeData()
+
+        if mime_data.hasUrls():
+            for uri in mime_data.data("text/uri-list").data().decode().split():
+                fs = QtCore.QUrl(uri).toLocalFile()
+                if os.path.exists(fs):
+                    self.copy_from_to(fs, path)
+
+    def copy_from_to(self, path_from, path_to, overwrite=False):
+        """Copy a file or folder from path_from into the directory path_to."""
+        if not os.path.isdir(path_to):
+            return
+
+        if not os.path.exists(path_from):
+            return
+
+        head, tail = os.path.split(path_from)
+        path_to = os.path.join(path_to, tail)
+
+        if not overwrite and os.path.exists(path_to):
+            logger.warning("{!r} already exists. Will not overwrite.", path_to)
+            QtWidgets.QMessageBox.warning(self, "Typstwriter", f"'{path_to}' already exists.\nWill not overwrite.")
+            return
+
+        if os.path.isdir(path_from):
+            shutil.copytree(path_from, path_to, dirs_exist_ok=overwrite)
+        else:
+            shutil.copy2(path_from, path_to)
+
+    def delete(self, paths):
         """Delete a folder or file."""
-        msg = QtWidgets.QMessageBox.question(self, "Typstwriter", f"Should '{path}' be deleted?")
-        if msg == QtWidgets.QMessageBox.StandardButton.Yes:
-            deletion_succeeded = QtCore.QFile.moveToTrash(path)
-            if not deletion_succeeded:
-                logger.warning("Could not move {!r} to trash.", path)
+        if not isinstance(paths, list):
+            paths = [paths]
+
+        for path in paths:
+            msg = QtWidgets.QMessageBox.question(self, "Typstwriter", f"Should '{path}' be deleted?")
+            if msg == QtWidgets.QMessageBox.StandardButton.Yes:
+                deletion_succeeded = QtCore.QFile.moveToTrash(path)
+                if not deletion_succeeded:
+                    logger.warning("Could not move {!r} to trash.", path)
