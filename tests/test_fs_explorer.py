@@ -146,6 +146,39 @@ class TestFSExplorer:
         assert from_path.exists()
         assert to_path.exists()
 
+    def test_copy_from_to(self, tmp_path, qtbot, caplog, monkeypatch):
+        """Make sure copying works."""
+        fse = fs_explorer.FSExplorer()
+        qtbot.addWidget(fse)
+        monkeypatch.setattr(QtWidgets.QMessageBox, "warning", lambda *args: QtWidgets.QMessageBox.Ok)
+
+        name = "test_file_name"
+        from_dir = tmp_path / "from"
+        to_dir = tmp_path / "to"
+        from_dir.mkdir()
+        to_dir.mkdir()
+        from_path = from_dir / name
+        to_path = to_dir / name
+
+        from_path.touch()
+
+        # Make sure the file can be copied
+        assert from_path.exists()
+        assert not to_path.exists()
+        fse.copy_from_to(str(from_path), str(to_dir))
+        assert from_path.exists()
+        assert to_path.exists()
+
+        # Make sure the file is not overwritten
+        from_path.touch()
+        to_path.touch()
+        assert from_path.exists()
+        assert to_path.exists()
+        fse.copy_from_to(str(from_path), str(to_dir))
+        assert "already exists" in caplog.text
+        assert from_path.exists()
+        assert to_path.exists()
+
     def test_delete(self, tmp_path, qtbot, monkeypatch):
         """Make sure a folder or file can be deleted."""
         fse = fs_explorer.FSExplorer()
