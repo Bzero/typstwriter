@@ -227,7 +227,7 @@ def selection_end_block(cursor):
 
 def typst_available():
     """Check if typst is available."""
-    expected_output = "The Typst compiler"
+    expected_output = "Typst"
     expected_exit_code = 2
 
     process = QtCore.QProcess()
