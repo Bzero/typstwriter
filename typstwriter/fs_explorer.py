@@ -209,10 +209,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.SelectionContextMenu = SelectionContextMenu(self)
 
         # Set initial state
-        root_dir = os.path.expanduser(config.get("General", "working_directory"))
-        if not os.path.exists(root_dir):
-            root_dir = os.path.expanduser("~/")
-        self.set_root(os.path.normpath(root_dir))
+        self.set_root(os.path.normpath(state.working_directory.Value))
 
     def open_directory_dialog(self):
         """Open a dialog to select root path and open said path."""
