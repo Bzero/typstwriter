@@ -818,7 +818,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         self.use_spaces = use_spaces
 
-    def resizeEvent(self, *e):  # noqa: N802 This is an overriding function
+    def resizeEvent(self, *e):  # This is an overriding function # noqa: N802
         """Resize."""
         super().resizeEvent(*e)
 
@@ -828,7 +828,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             rect = QtCore.QRect(cr.left(), cr.top(), width, cr.height())
             self.line_numbers.setGeometry(rect)
 
-    def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
+    def keyPressEvent(self, e):  # This is an overriding function # noqa: N802
         """Intercept, modify and forward keyPressEvent."""
         # Indent if Tab pressed
         if e.key() == QtCore.Qt.Key_Tab and e.modifiers() == QtCore.Qt.NoModifier:
@@ -1081,7 +1081,7 @@ class LineNumberWidget(QtWidgets.QWidget):
         """Init."""
         QtWidgets.QWidget.__init__(self, parent)
 
-    def paintEvent(self, event):  # noqa: N802 This is an overriding function
+    def paintEvent(self, event):  # This is an overriding function # noqa: N802
         """Paint the widget."""
         painter = QtGui.QPainter(self)
 

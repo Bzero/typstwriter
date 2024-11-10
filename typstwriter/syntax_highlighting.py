@@ -138,7 +138,7 @@ class CodeSyntaxHighlight(QtGui.QSyntaxHighlighter):
         """Line number special background color."""
         return self.formatter.style.line_number_special_background_color
 
-    def highlightBlock(self, text):  # noqa: N802 This is an overriding function
+    def highlightBlock(self, text):  # This is an overriding function # noqa: N802
         """Highlight the given text block."""
         format_list = self.formatter.format(pygments.lex(text, self.lexer), None)
         start = 0

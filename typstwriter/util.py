@@ -47,11 +47,11 @@ class RecentFilesModel(QtCore.QAbstractListModel):
             case _:
                 return None
 
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):  # noqa: N802 This is an overriding function
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):  # This is an overriding function # noqa: N802
         """Return the header name."""
         return "Filepath"
 
-    def rowCount(self, index):  # noqa: N802 This is an overriding function
+    def rowCount(self, index):  # This is an overriding function # noqa: N802
         """Return the number of stored filepaths."""
         return len(self.recent_files)
 

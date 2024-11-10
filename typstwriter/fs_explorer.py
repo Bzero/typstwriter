@@ -307,7 +307,7 @@ class FSExplorer(QtWidgets.QWidget):
         self.SelectionContextMenu.context_path = paths
         self.SelectionContextMenu.popup(QtGui.QCursor.pos())
 
-    def keyPressEvent(self, e):  # noqa: N802 This is an overriding function
+    def keyPressEvent(self, e):  # This is an overriding function # noqa: N802
         """Intercept keyPressEvent."""
         if e.key() == QtCore.Qt.Key_Delete and e.modifiers() == QtCore.Qt.NoModifier:
             self.delete(self.selected_paths())
