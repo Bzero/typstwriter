@@ -20,6 +20,7 @@ dependencies = [
 "qtpy >= 2.3",
 "pyside6 >= 6.4.0",
 "pygments >= 2.18",
+"platformdirs >= 4.0"
 ]
 dynamic = ["version"]
 

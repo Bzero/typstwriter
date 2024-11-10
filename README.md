@@ -18,7 +18,9 @@ Typstwriter looks for configuration files in the following locations:
 
 * /etc/typstwriter/typstwriter.ini
 * /usr/local/etc/typstwriter/typstwriter.ini
-* ~/.config/typstwriter/typstwriter.ini
+* Platform specific configuration directory:
+	* $XDG_CONFIG_HOME/typstwriter/typstwriter.ini
+	* %USERPROFILE%\AppData\Local\typstwriter\typstwriter\typstwriter.ini
 * ~/.typstwriter.ini
 * ./typstwriter.ini
 

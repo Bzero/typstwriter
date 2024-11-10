@@ -1,12 +1,15 @@
 import os
 import configparser
 
+import platformdirs
+
 from typstwriter import logging
 
 logger = logging.getLogger(__name__)
 
 
-default_config_path = os.path.expanduser("~/.config/typstwriter/typstwriter.ini")
+default_config_path = os.path.join(platformdirs.user_config_dir("typstwriter", "typstwriter"), "typstwriter.ini")
+default_recent_files_path = os.path.join(platformdirs.user_data_dir("typstwriter", "typstwriter"), "recentFiles.txt")
 
 config_paths = ["/etc/typstwriter/typstwriter.ini",
                 "/usr/local/etc/typstwriter/typstwriter.ini",
@@ -28,7 +31,7 @@ default_config = {"General": {"working_directory": "~/"},
                              "show_fs_explorer": True,
                              "show_compiler_options": True,
                              "show_compiler_output": True},
-                  "Internals": {"recent_files_path": "~/.config/typstwriter/recentFiles.txt",
+                  "Internals": {"recent_files_path": default_recent_files_path,
                                 "recent_files_length": 16}}  # fmt: skip
 
 
