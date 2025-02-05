@@ -37,6 +37,12 @@ class Actions(QtCore.QObject):
         self.open_recent_File.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL | QtCore.Qt.SHIFT | QtCore.Qt.Key_O))
         self.open_recent_File.setText("Open Recent File")
 
+        self.load_last_Session = QtWidgets.QAction(self)
+        self.load_last_Session.setIcon(
+            QtGui.QIcon.fromTheme("folder-open-recent", QtGui.QIcon(util.icon_path("lastSession.svg")))
+        )
+        self.load_last_Session.setText("Load last Session")
+
         self.save = QtWidgets.QAction(self)
         self.save.setIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentSave, QtGui.QIcon(util.icon_path("save.svg"))))
         self.save.setShortcut(QtGui.QKeySequence.Save)

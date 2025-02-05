@@ -40,6 +40,7 @@ class MenuBar(QtWidgets.QMenuBar):
         self.menuFile.addAction(actions.open_File)
         self.recent_files_menu = RecentFilesMenu()
         self.menuFile.addMenu(self.recent_files_menu)
+        self.menuFile.addAction(actions.load_last_Session)
         self.menuFile.addSeparator()
         self.menuFile.addAction(actions.save)
         self.menuFile.addAction(actions.save_as)

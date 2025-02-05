@@ -111,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.editor.recent_files_changed.connect(self.menubar.recent_files_menu.display_recent_files)
         self.menubar.recent_files_menu.open_file.connect(self.editor.open_file)
         self.menubar.recent_files_menu.display_recent_files(self.editor.recentFiles.list())
+        self.actions.load_last_Session.triggered.connect(self.load_session)
         self.actions.save.triggered.connect(self.editor.saveactive_tab)
         self.actions.save_as.triggered.connect(self.editor.saveactive_tab_as)
         self.actions.close.triggered.connect(self.editor.closeactive_tab)
@@ -167,6 +168,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Check if typst is available
         QtCore.QTimer().singleShot(0, self.check_typst_availability)
+
+        if config.get("General", "resume_last_session", "bool"):
+            QtCore.QTimer().singleShot(0, self.load_session)
 
         logger.info("Gui ready")
 
@@ -233,6 +237,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):  # noqa: N802
         """Handle close event."""
         self.CompilerConnector.stop()
+        self.save_session()
         s = self.editor.tryclose()
         if s:
             event.accept()
@@ -250,6 +255,21 @@ class MainWindow(QtWidgets.QMainWindow):
             self.CompilerConnector.set_fin(main)
             self.CompilerConnector.set_fout(util.pdf_path(main))
             self.PDFWidget.open(util.pdf_path(main))
+
+    def load_session(self):
+        """Load the last session."""
+        logger.info("Loading last session.")
+        session = util.read_session_file()
+        if session:
+            (working_directory, files) = session
+            state.working_directory.Value = working_directory
+            for f in files:
+                self.editor.open_file(f)
+
+    def save_session(self):
+        """Save the current session."""
+        logger.debug("Saving last session.")
+        util.write_session_file(state.working_directory.Value, self.editor.openfiles_list())
 
     def check_typst_availability(self):
         """Check if typst is available."""
