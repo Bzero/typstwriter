@@ -45,7 +45,7 @@ class TestZoomSelector:
         with qtbot.waitSignals(
             [(zoomselector.zoom_mode_changed, "zoom_mode_changed"), (zoomselector.zoom_factor_changed, "zoom_factor_changed")]
         ) as blocker:
-            zoomselector.lineEdit().setText(f"{int(zoom*100)}%")
+            zoomselector.lineEdit().setText(f"{int(zoom * 100)}%")
 
         args = [s.args for s in blocker.all_signals_and_args]
         assert (zoom,) in args
@@ -148,18 +148,18 @@ class TestPDFViewer:
 
         pdf_v.open(str(tmp_pdf))
 
-        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom*100)}%")
-        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom*100)}%"
+        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom * 100)}%")
+        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom * 100)}%"
         assert pdf_v.pdfView.zoomFactor() == zoom
 
-        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom*100)}%")
+        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom * 100)}%")
         pdf_v.actionZoom_Out.trigger()
-        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom*100/1.2)}%"
+        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom * 100 / 1.2)}%"
         assert pdf_v.pdfView.zoomFactor() == zoom / 1.2
 
-        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom*100)}%")
+        pdf_v.m_zoomSelector.setCurrentText(f"{int(zoom * 100)}%")
         pdf_v.actionZoom_In.trigger()
-        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom*100*1.2)}%"
+        assert pdf_v.m_zoomSelector.currentText() == f"{int(zoom * 100 * 1.2)}%"
         assert pdf_v.pdfView.zoomFactor() == zoom * 1.2
 
         # TODO: test fit width
