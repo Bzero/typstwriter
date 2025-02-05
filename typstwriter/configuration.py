@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 default_config_path = os.path.join(platformdirs.user_config_dir("typstwriter", "typstwriter"), "typstwriter.ini")
 default_recent_files_path = os.path.join(platformdirs.user_data_dir("typstwriter", "typstwriter"), "recentFiles.txt")
+default_session_path = os.path.join(platformdirs.user_data_dir("typstwriter", "typstwriter"), "Session.txt")
 
 config_paths = ["/etc/typstwriter/typstwriter.ini",
                 "/usr/local/etc/typstwriter/typstwriter.ini",
@@ -17,7 +18,8 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 os.path.expanduser("~/.typstwriter.ini"),
                 "./typstwriter.ini"]  # fmt: skip
 
-default_config = {"General": {"working_directory": "~/"},
+default_config = {"General": {"working_directory": "~/",
+                              "resume_last_session": False},
                   "Compiler": {"name": "typst",
                                "mode": "on_demand"},
                   "Editor": {"font_size": 10,
@@ -32,7 +34,8 @@ default_config = {"General": {"working_directory": "~/"},
                              "show_compiler_options": True,
                              "show_compiler_output": True},
                   "Internals": {"recent_files_path": default_recent_files_path,
-                                "recent_files_length": 16}}  # fmt: skip
+                                "recent_files_length": 16,
+                                "session_path": default_session_path}}  # fmt: skip
 
 
 class ConfigManager:

@@ -152,7 +152,7 @@ class Editor(QtWidgets.QFrame):
 
     def openfiles_list(self):
         """Return (ordered) list of opened files."""
-        return [t.path for t in self.tabs_list()]
+        return [t.path for t in self.tabs_list() if t.path]
 
     def tryclose(self):
         """Try closing the editor, i.e. close all tabs and save the recent files."""

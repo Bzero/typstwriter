@@ -6,6 +6,7 @@ import collections
 import os
 import platform
 import subprocess
+import json
 
 from typstwriter import logging
 from typstwriter import configuration
@@ -257,3 +258,29 @@ def qstring_length(text):
     if utf16_text[:2] in [b"\xff\xfe", b"\xff\xff", b"\xfe\xff"]:
         length -= 1
     return length
+
+
+def read_session_file():
+    """Read Session file."""
+    path = os.path.expanduser(config.get("Internals", "session_path"))
+    try:
+        with open(path, "r") as f:
+            (working_directory, files) = json.load(f)
+        return (working_directory, files)
+    except OSError:
+        logger.info("Could not read file {!r}.", path)
+        return None
+    except ValueError:
+        logger.warning("Invalid session file {!r}.", path)
+        return None
+
+
+def write_session_file(working_directory, files):
+    """Write Session file."""
+    path = os.path.expanduser(config.get("Internals", "session_path"))
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            json.dump((working_directory, files), f)
+    except OSError:
+        logger.info("Could not write file {!r}.", path)
