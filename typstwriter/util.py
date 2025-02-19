@@ -228,8 +228,8 @@ def selection_end_block(cursor):
 
 def typst_available():
     """Check if typst is available."""
-    expected_output = "Typst"
-    expected_exit_code = 2
+    valid_output = "Typst"
+    valid_exit_codes = [0, 2]
 
     process = QtCore.QProcess()
     process.setProcessChannelMode(QtCore.QProcess.ProcessChannelMode.MergedChannels)
@@ -238,9 +238,7 @@ def typst_available():
     output = bytes(process.readAll()).decode("utf8")
 
     return (
-        process.exitStatus() == QtCore.QProcess.NormalExit
-        and process.exitCode() == expected_exit_code
-        and expected_output in output
+        process.exitStatus() == QtCore.QProcess.NormalExit and process.exitCode() in valid_exit_codes and valid_output in output
     )
 
 
