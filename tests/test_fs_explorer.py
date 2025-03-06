@@ -165,7 +165,7 @@ class TestFSExplorer:
         # Make sure the file can be copied
         assert from_path.exists()
         assert not to_path.exists()
-        fse.copy_from_to(str(from_path), str(to_dir))
+        fse.copy_from_to(str(from_path), str(to_path))
         assert from_path.exists()
         assert to_path.exists()
 
@@ -174,7 +174,7 @@ class TestFSExplorer:
         to_path.touch()
         assert from_path.exists()
         assert to_path.exists()
-        fse.copy_from_to(str(from_path), str(to_dir))
+        fse.copy_from_to(str(from_path), str(to_path))
         assert "already exists" in caplog.text
         assert from_path.exists()
         assert to_path.exists()

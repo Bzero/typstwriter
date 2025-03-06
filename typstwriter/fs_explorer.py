@@ -395,18 +395,30 @@ class FSExplorer(QtWidgets.QWidget):
             for uri in mime_data.data("text/uri-list").data().decode().split():
                 fs = QtCore.QUrl(uri).toLocalFile()
                 if os.path.exists(fs):
-                    self.copy_from_to(fs, path)
+                    head, tail = os.path.split(fs)
+                    path_to = os.path.join(path, tail)
+
+                    if os.path.exists(path_to):
+                        new_tail, ok = QtWidgets.QInputDialog.getText(
+                            self,
+                            "Typstwriter",
+                            "Destination already exists. Enter new name:",
+                            QtWidgets.QLineEdit.Normal,
+                            text=tail,
+                        )
+                        path_to = os.path.join(path, new_tail)
+                        if not ok:
+                            return
+
+                    self.copy_from_to(fs, path_to)
 
     def copy_from_to(self, path_from, path_to, overwrite=False):
-        """Copy a file or folder from path_from into the directory path_to."""
-        if not os.path.isdir(path_to):
+        """Copy a file or folder from path_from to path_to."""
+        if not os.path.isdir(os.path.split(path_to)[0]):
             return
 
         if not os.path.exists(path_from):
             return
-
-        head, tail = os.path.split(path_from)
-        path_to = os.path.join(path_to, tail)
 
         if not overwrite and os.path.exists(path_to):
             logger.warning("{!r} already exists. Will not overwrite.", path_to)
