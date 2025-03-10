@@ -846,6 +846,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 self._remove_tab_l(self.textCursor())
             return
 
+        # Toggle comments if Ctrl+/ pressed
+        if e.key() == QtCore.Qt.Key_Slash and e.modifiers() == QtCore.Qt.ControlModifier:
+            self.toggle_comment()
+            return
+
         # Avoid inserting line break characters
         if e.key() == QtCore.Qt.Key_Return and e.modifiers() == QtCore.Qt.ShiftModifier:
             e = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier, "\r")
@@ -968,6 +973,53 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor.beginEditBlock()
         for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
             self._remove_tab_r(cursor)
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
+
+    def toggle_comment(self):
+        """Toggle comment of the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        all_lines_commented = True
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            if not cursor.block().text().strip().startswith("//"):
+                all_lines_commented = False
+                break
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+
+        if not all_lines_commented:
+            self.comment()
+        else:
+            self.uncomment()
+
+    def comment(self):
+        """Comment the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            cursor.insertText("//")
+            cursor.movePosition(QtGui.QTextCursor.NextBlock)
+        cursor.endEditBlock()
+
+    def uncomment(self):
+        """Uncomment the selected lines."""
+        cursor = self.textCursor()
+        cursor.setPosition(self.textCursor().selectionStart())
+        cursor.movePosition(QtGui.QTextCursor.StartOfBlock)
+
+        cursor.beginEditBlock()
+        for _ in range(util.selection_end_block(self.textCursor()) - util.selection_start_block(self.textCursor()) + 1):
+            line = cursor.block().text()
+            if line.lstrip().startswith("//"):
+                indent = len(line) - len(line.lstrip())
+                cursor.movePosition(QtGui.QTextCursor.Right, n=indent)
+                cursor.deleteChar()
+                cursor.deleteChar()
             cursor.movePosition(QtGui.QTextCursor.NextBlock)
         cursor.endEditBlock()
 

@@ -41,6 +41,15 @@ search_data = [
     ),
 ]
 
+comment_text = [
+    ("Just some text.", "//Just some text.", "Just some text.", (0, 0)),
+    ("Just\nsome\ntext.", "//Just\n//some\ntext.", "Just\nsome\ntext.", (0, 1)),
+    ("Just\n//some\ntext.", "//Just\n////some\n//text.", "Just\n//some\ntext.", (0, 2)),
+    ("Just\n//some\ntext.", "Just\nsome\ntext.", "Just\n//some\ntext.", (1, 1)),
+    ("Just\n  //some\ntext.", "Just\n  some\ntext.", "Just\n//  some\ntext.", (1, 1)),
+    ("Just\nsome//more\ntext.", "Just\n//some//more\ntext.", "Just\nsome//more\ntext.", (1, 1)),
+]
+
 
 class TestWelcomePage:
     """Test editor.WelcomePage."""
@@ -133,3 +142,21 @@ class TestCodeEdit:
         for selection, span in zip(code_edit.search_highlights, spans, strict=True):
             assert selection.cursor.anchor() == span[0]
             assert selection.cursor.position() == span[1]
+
+    @pytest.mark.parametrize(("text", "toggle", "retoggle", "selection"), comment_text)
+    def test_highlight_all_matches(self, text, toggle, retoggle, selection):  # noqa PT019
+        """Test toggle_comment() for various selections."""
+        start, stop = selection
+        code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
+        code_edit.insertPlainText(text)
+        cursor = code_edit.textCursor()
+        cursor.setPosition(0)
+        cursor.movePosition(QtGui.QTextCursor.NextBlock, QtGui.QTextCursor.MoveAnchor, start)
+        cursor.movePosition(QtGui.QTextCursor.NextBlock, QtGui.QTextCursor.KeepAnchor, stop - start)
+        code_edit.setTextCursor(cursor)
+
+        code_edit.toggle_comment()
+        assert code_edit.toPlainText() == toggle
+
+        code_edit.toggle_comment()
+        assert code_edit.toPlainText() == retoggle
