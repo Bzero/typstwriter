@@ -209,7 +209,8 @@ class PDFViewer(QtWidgets.QFrame):
         """Reload file."""
         if self.docpath and os.path.exists(self.docpath):
             # get current scroll position
-            pos = self.pdfView.verticalScrollBar().value()
+            pos_h = self.pdfView.horizontalScrollBar().value()
+            pos_v = self.pdfView.verticalScrollBar().value()
 
             # reload
             t1 = time()
@@ -221,7 +222,8 @@ class PDFViewer(QtWidgets.QFrame):
             self.m_maxPage.setText(f" of {self.m_document.pageCount()}")
 
             # scroll back to same point
-            self.pdfView.verticalScrollBar().setValue(pos)
+            self.pdfView.horizontalScrollBar().setValue(pos_h)
+            self.pdfView.verticalScrollBar().setValue(pos_v)
 
             logger.debug("Reloaded from disk in {:.2f}ms.", (t2 - t1) * 1000)
         else:
