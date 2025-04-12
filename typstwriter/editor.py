@@ -197,6 +197,7 @@ class Editor(QtWidgets.QFrame):
         page = self.TabWidget.currentWidget()
         if isinstance(page, EditorPage):
             page.search_bar.show()
+            page.search_bar.edit_search.setSelection(0, len(page.search_bar.edit_search.text()))
             # page.search_bar.edit_search.setFocus()
 
     @QtCore.Slot()
