@@ -162,15 +162,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # Use default layout
         self.use_default_layout()
 
+        # Load last session
+        if config.get("General", "resume_last_session", "bool"):
+            self.load_session()
+
         # Open files if given as arguments
         for file in args.files:
             self.editor.open_file(file)
 
+        # Show welcome tab if empty otherwise
+        if len(self.editor.tabs_list()) == 0:
+            self.editor.welcome()
+
         # Check if typst is available
         QtCore.QTimer().singleShot(0, self.check_typst_availability)
-
-        if config.get("General", "resume_last_session", "bool"):
-            QtCore.QTimer().singleShot(0, self.load_session)
 
         logger.info("Gui ready")
 
@@ -216,6 +221,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_fs_explorer.setChecked(config.get("Layout", "show_fs_explorer", typ="bool"))
         self.actions.show_compiler_options.setChecked(config.get("Layout", "show_compiler_options", typ="bool"))
         self.actions.show_compiler_output.setChecked(config.get("Layout", "show_compiler_output", typ="bool"))
+
+        self.splitter.setSizes([1e6, 1e6])
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""

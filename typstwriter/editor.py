@@ -53,8 +53,6 @@ class Editor(QtWidgets.QFrame):
 
         self.font_size = config.get("Editor", "font_size", typ="int")
 
-        self.welcome()
-
     def tab_bar_rightclicked(self, event):
         """Handle right click on the tab bar."""
         tab_index = self.TabWidget.tabBar().tabAt(event)
