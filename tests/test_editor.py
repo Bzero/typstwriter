@@ -126,7 +126,7 @@ class TestCodeEdit:
         assert code_edit.toPlainText() == "\n"
 
     @pytest.mark.parametrize(("text", "query", "mode", "_spans", "replace_text", "result"), search_data)
-    def test_replace_all_matches(self, query, mode, text, replace_text, result, _spans):  # noqa PT019
+    def test_replace_all_matches(self, query, mode, text, replace_text, result, _spans):
         """Test replace_all_matches() for all four query modes."""
         code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
         code_edit.insertPlainText(text)
@@ -134,7 +134,7 @@ class TestCodeEdit:
         assert code_edit.toPlainText() == result
 
     @pytest.mark.parametrize(("text", "query", "mode", "spans", "_replace_text", "_result"), search_data)
-    def test_highlight_all_matches(self, query, mode, text, spans, _replace_text, _result):  # noqa PT019
+    def test_highlight_all_matches(self, query, mode, text, spans, _replace_text, _result):
         """Test highlight_all_matches() for all four query modes."""
         code_edit = editor.CodeEdit(highlight_synatx=False, show_line_numbers=False, use_spaces=True)
         code_edit.insertPlainText(text)
