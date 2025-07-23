@@ -416,7 +416,7 @@ class EditorPage(QtWidgets.QFrame):
         logger.debug("Saving to: {!r}.", self.path)
 
         try:
-            with open(self.path, "w") as f:
+            with open(self.path, "w", encoding="utf-8") as f:
                 f.write(self.edit.document().toPlainText())
 
             self.justsaved = True
