@@ -29,10 +29,8 @@ class CompilerOptions(QtWidgets.QWidget):
 
         self.HostWidget = QtWidgets.QFrame(self)
         self.HostWidget.setFrameStyle(QtWidgets.QFrame.Shape.StyledPanel)
-        palette = self.HostWidget.palette()
-        palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor("white"))
+        self.HostWidget.setBackgroundRole(QtGui.QPalette.ColorRole.Base)
         self.HostWidget.setAutoFillBackground(True)
-        self.HostWidget.setPalette(palette)
         self.FrameLayout.addWidget(self.HostWidget)
 
         self.Layout = QtWidgets.QGridLayout(self.HostWidget)
