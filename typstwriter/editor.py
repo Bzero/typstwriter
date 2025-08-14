@@ -383,7 +383,7 @@ class EditorPage(QtWidgets.QFrame):
     def load(self, path):
         """Load file."""
         try:
-            with open(path, "r") as file:
+            with open(path, "r", encoding="utf-8") as file:
                 filecontent = file.read()
 
             self.edit.setPlainText(filecontent)
