@@ -910,7 +910,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
             mark_span = QtWidgets.QTextEdit.ExtraSelection()
             mark_span.format.setUnderlineStyle(QtGui.QTextCharFormat.DashUnderline)
-            mark_span.format.setUnderlineColor("#cc1b1b")
+            mark_span.format.setUnderlineColor(QtGui.QColor(self.highlighter.error_font_color))
             mark_span.cursor = cursor
             highlights.append(mark_span)
 
