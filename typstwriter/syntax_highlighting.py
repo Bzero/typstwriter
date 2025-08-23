@@ -143,6 +143,15 @@ class CodeSyntaxHighlight(QtGui.QSyntaxHighlighter):
         """Font color for error tockens."""
         return self.formatter.style.styles[pygments.token.Error]
 
+    @property
+    def error_highlight_color(self):
+        """Color for highlighting errors."""
+        # Use the same saturation, value (brightness) and alpha as standard highlight color, but use hue 0 (red).
+        # This ensures decent readability on most themes while being distinct from the standard highlight color.
+        color = QtGui.QColor(self.highlight_color)
+        color.setHsv(0, color.saturation(), color.value(), color.alpha())
+        return color.name(QtGui.QColor.HexRgb)
+
     def highlightBlock(self, text):  # This is an overriding function # noqa: N802
         """Highlight the given text block."""
         format_list = self.formatter.format(pygments.lex(text, self.lexer), None)

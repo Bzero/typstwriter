@@ -902,7 +902,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             cursor.movePosition(QtGui.QTextCursor.MoveOperation.Right, QtGui.QTextCursor.MoveMode.KeepAnchor, length)
 
             mark_line = QtWidgets.QTextEdit.ExtraSelection()
-            mark_line.format.setBackground(QtGui.QColor(self.highlighter.highlight_color))
+            mark_line.format.setBackground(QtGui.QColor(self.highlighter.error_highlight_color))
             mark_line.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
             mark_line.cursor = cursor
             mark_line.cursor.clearSelection()
