@@ -140,7 +140,7 @@ class CodeSyntaxHighlight(QtGui.QSyntaxHighlighter):
 
     @property
     def error_font_color(self):
-        """Font color for error tockens."""
+        """Font color for error tokens."""
         return self.formatter.style.styles[pygments.token.Error]
 
     @property
