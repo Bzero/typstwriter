@@ -902,7 +902,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             cursor.movePosition(QtGui.QTextCursor.MoveOperation.Right, QtGui.QTextCursor.MoveMode.KeepAnchor, length)
 
             mark_line = QtWidgets.QTextEdit.ExtraSelection()
-            mark_line.format.setBackground(QtGui.QColor("#ffeeee"))
+            mark_line.format.setBackground(QtGui.QColor(self.highlighter.error_highlight_color))
             mark_line.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
             mark_line.cursor = cursor
             mark_line.cursor.clearSelection()
@@ -910,7 +910,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
             mark_span = QtWidgets.QTextEdit.ExtraSelection()
             mark_span.format.setUnderlineStyle(QtGui.QTextCharFormat.DashUnderline)
-            mark_span.format.setUnderlineColor("#cc1b1b")
+            mark_span.format.setUnderlineColor(QtGui.QColor(self.highlighter.error_font_color))
             mark_span.cursor = cursor
             highlights.append(mark_span)
 
