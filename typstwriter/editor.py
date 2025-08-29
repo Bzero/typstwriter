@@ -1137,7 +1137,24 @@ class LineNumberWidget(QtWidgets.QWidget):
         painter = QtGui.QPainter(self)
 
         # paint background
-        painter.fillRect(event.rect(), QtGui.QColor(self.parentWidget().highlighter.line_number_background_color))
+        if self.parentWidget().highlighter.line_number_background_color == "transparent":
+            painter.fillRect(event.rect(), QtGui.QColor(self.parentWidget().highlighter.background_color))
+            # paint separator between line numbers and editor
+            color = QtGui.QColor(self.parentWidget().highlighter.background_color)
+            if color.value() <= 127:  # mid lightness # noqa PLR2004
+                # QColor.lighter() works by multiplying the value with a factor and therefore has no effect if value == 0
+                color = QtGui.QColor("#373737") if color.value() == 0 else color.lighter(200)
+            else:
+                color = color.darker(130)
+            painter.setPen(QtGui.QPen(QtGui.QBrush(color), 2))
+            painter.drawLine(
+                event.rect().left() + event.rect().width(),
+                event.rect().top(),
+                event.rect().left() + event.rect().width(),
+                event.rect().top() + event.rect().height(),
+            )
+        else:
+            painter.fillRect(event.rect(), QtGui.QColor(self.parentWidget().highlighter.line_number_background_color))
 
         # paint line numbers
         painter.setPen(QtGui.QColor(self.parentWidget().highlighter.line_number_color))
