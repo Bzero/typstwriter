@@ -2,6 +2,8 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
+import qt_themes
+
 from typstwriter import menubar
 from typstwriter import toolbar
 from typstwriter import actions
@@ -151,6 +153,9 @@ class MainWindow(QtWidgets.QMainWindow):
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
+        for theme in self.actions.themes_list:
+            theme[0].triggered.connect(lambda s, t=theme: self.set_theme(t[1]))
+
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
         self.CompilerConnector.new_stderr.connect(self.CompilerOutput.append_to_block)
@@ -161,6 +166,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Use default layout
         self.use_default_layout()
+
+        # Use default theme
+        self.use_default_theme()
 
         # Load last session
         if config.get("General", "resume_last_session", "bool"):
@@ -178,6 +186,13 @@ class MainWindow(QtWidgets.QMainWindow):
         QtCore.QTimer().singleShot(0, self.check_typst_availability)
 
         logger.info("Gui ready")
+
+    def set_theme(self, theme):
+        """Set Theme to selected."""
+        if theme not in list(qt_themes.get_themes().keys()):
+            theme = None
+
+        qt_themes.set_theme(theme)
 
     def set_layout_typewriter(self):
         """Set Typstwriter Layout: PDF on top, Editor on bottom."""
@@ -223,6 +238,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_compiler_output.setChecked(config.get("Layout", "show_compiler_output", typ="bool"))
 
         self.splitter.setSizes([1e6, 1e6])
+
+    def use_default_theme(self):
+        """Apply theme set in the config."""
+        default_theme = config.get("Theme", "default_theme")
+        if default_theme not in list(qt_themes.get_themes().keys()):
+            default_theme = None
+        
+        # Set this way to make sure it is also selcted in the menu bar
+        for theme in self.actions.themes_list:
+            if theme[1] == default_theme:
+                theme[0].trigger()
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""
