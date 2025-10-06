@@ -137,7 +137,7 @@ def open_with_external_program(path):
 
 def pdf_path(typst_path):
     """Convert a input path to a pdf output path."""
-    (trunk, ext) = os.path.splitext(typst_path)
+    (trunk, _) = os.path.splitext(typst_path)
     pdf_path = trunk + ".pdf"
     return pdf_path
 

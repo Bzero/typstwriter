@@ -395,7 +395,7 @@ class FSExplorer(QtWidgets.QWidget):
             for uri in mime_data.data("text/uri-list").data().decode().split():
                 fs = QtCore.QUrl(uri).toLocalFile()
                 if os.path.exists(fs):
-                    head, tail = os.path.split(fs)
+                    _, tail = os.path.split(fs)
                     path_to = os.path.join(path, tail)
 
                     if os.path.exists(path_to):
