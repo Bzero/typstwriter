@@ -33,6 +33,7 @@ default_config = {"General": {"working_directory": "~/",
                              "show_fs_explorer": True,
                              "show_compiler_options": True,
                              "show_compiler_output": True},
+                  "Theme": {"default_theme": "default"},
                   "Internals": {"recent_files_path": default_recent_files_path,
                                 "recent_files_length": 16,
                                 "session_path": default_session_path}}  # fmt: skip
