@@ -77,7 +77,7 @@ class CompilerOptions(QtWidgets.QWidget):
     def open_file_dialog(self):
         """Open a dialog to select the main file."""
         filters = "Typst Files (*.typ);;Any File (*)"
-        path, cd = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", state.working_directory.Value, filters)
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", state.working_directory.Value, filters)
 
         if os.path.isfile(path):
             self.line_edit_main.setText(path)

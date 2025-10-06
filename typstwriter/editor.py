@@ -101,7 +101,7 @@ class Editor(QtWidgets.QFrame):
     def open_file_dialog(self):
         """Open a dialog to open an existing file."""
         filters = "Typst Files (*.typ);;Bibliography Files (*.bib *.yml);;Any File (*)"
-        path, cd = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", state.working_directory.Value, filters)
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", state.working_directory.Value, filters)
         if path:
             self.open_file(path)
 
@@ -448,7 +448,7 @@ class EditorPage(QtWidgets.QFrame):
 
     def save_as(self):
         """Save file under a new name."""
-        path, cd = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", state.working_directory.Value)
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", state.working_directory.Value)
 
         if os.path.exists(path) or os.access(os.path.dirname(path), os.W_OK):
             self.path = path
@@ -893,7 +893,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """Highlight compiler errors."""
         highlights = []
         for e in errors:
-            (error, line, col, length) = e
+            (_, line, col, length) = e
             # the error code is not currently used but it may be displayed in the editor in the future
 
             cursor = QtGui.QTextCursor(self.document())
