@@ -244,7 +244,7 @@ class MainWindow(QtWidgets.QMainWindow):
         default_theme = config.get("Theme", "default_theme")
         if default_theme not in list(qt_themes.get_themes().keys()):
             default_theme = None
-        
+
         # Set this way to make sure it is also selcted in the menu bar
         for theme in self.actions.themes_list:
             if theme[1] == default_theme:

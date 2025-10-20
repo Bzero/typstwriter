@@ -129,7 +129,7 @@ class Actions(QtCore.QObject):
         self.themes_list.append((self.theme, None))
         self.themes.addAction(self.theme)
 
-        for theme in sorted(list(qt_themes.get_themes().keys())):
+        for theme in sorted(qt_themes.get_themes().keys()):
             self.theme = QtWidgets.QAction(self)
             name = theme.replace("_", " ").title()
             self.theme.setText(name)
