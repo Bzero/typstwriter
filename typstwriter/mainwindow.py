@@ -153,9 +153,6 @@ class MainWindow(QtWidgets.QMainWindow):
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
-        # for theme in self.actions.themes_list:
-        #     theme[0].triggered.connect(lambda s, t=theme: self.set_theme(t[1]))
-
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
         self.CompilerConnector.new_stderr.connect(self.CompilerOutput.append_to_block)
