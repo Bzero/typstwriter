@@ -6,6 +6,7 @@ import os
 os.environ["QT_API"] = "pyside6"
 import qtpy  # noqa: E402 RUF100
 
+
 def main():
     """Run Typstwriter."""
     # Initialise logging

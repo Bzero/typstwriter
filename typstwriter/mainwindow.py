@@ -153,8 +153,8 @@ class MainWindow(QtWidgets.QMainWindow):
         state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
-        for theme in self.actions.themes_list:
-            theme[0].triggered.connect(lambda s, t=theme: self.set_theme(t[1]))
+        # for theme in self.actions.themes_list:
+        #     theme[0].triggered.connect(lambda s, t=theme: self.set_theme(t[1]))
 
         # For now only display errors
         self.CompilerConnector.compilation_started.connect(self.CompilerOutput.insert_block)
@@ -241,14 +241,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def use_default_theme(self):
         """Apply theme set in the config."""
-        default_theme = config.get("Theme", "default_theme")
+        default_theme = config.get("General", "default_theme")
         if default_theme not in list(qt_themes.get_themes().keys()):
             default_theme = None
 
         # Set this way to make sure it is also selcted in the menu bar
-        for theme in self.actions.themes_list:
-            if theme[1] == default_theme:
-                theme[0].trigger()
+        for theme in list(self.actions.themes.actions()):
+            print(theme.data(), default_theme)
+            if theme.data() == default_theme:
+                theme.trigger()
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""

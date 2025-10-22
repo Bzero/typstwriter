@@ -119,23 +119,22 @@ class Actions(QtCore.QObject):
         self.layout.addAction(self.layout_editorL)
         self.layout.addAction(self.layout_editorR)
 
-        self.themes_list = []
-        self.default = None
         self.themes = QtWidgets.QActionGroup(self)
 
-        self.theme = QtWidgets.QAction(self)
-        self.theme.setText("System Default")
-        self.theme.setCheckable(True)
-        self.themes_list.append((self.theme, None))
-        self.themes.addAction(self.theme)
+        theme = QtWidgets.QAction(self)
+        theme.setData(None)
+        theme.setText("System Default")
+        theme.setCheckable(True)
+        theme.triggered.connect(lambda: qt_themes.set_theme(None))
+        self.themes.addAction(theme)
 
-        for theme in sorted(qt_themes.get_themes().keys()):
-            self.theme = QtWidgets.QAction(self)
-            name = theme.replace("_", " ").title()
-            self.theme.setText(name)
-            self.theme.setCheckable(True)
-            self.themes_list.append((self.theme, theme))
-            self.themes.addAction(self.theme)
+        for t in sorted(qt_themes.get_themes().keys()):
+            theme = QtWidgets.QAction(self)
+            theme.setData(t)
+            theme.setText(t.replace("_", " ").title())
+            theme.setCheckable(True)
+            theme.triggered.connect(lambda s, t=t: qt_themes.set_theme(t))
+            self.themes.addAction(theme)
 
         self.show_fs_explorer = QtWidgets.QAction(self)
         self.show_fs_explorer.setText("Show FS Explorer")

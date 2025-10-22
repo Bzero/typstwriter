@@ -19,7 +19,8 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
                 "./typstwriter.ini"]  # fmt: skip
 
 default_config = {"General": {"working_directory": "~/",
-                              "resume_last_session": False},
+                              "resume_last_session": False,
+                              "default_theme": "default"},
                   "Compiler": {"name": "typst",
                                "mode": "on_demand"},
                   "Editor": {"font_size": 10,
@@ -33,7 +34,6 @@ default_config = {"General": {"working_directory": "~/",
                              "show_fs_explorer": True,
                              "show_compiler_options": True,
                              "show_compiler_output": True},
-                  "Theme": {"default_theme": "default"},
                   "Internals": {"recent_files_path": default_recent_files_path,
                                 "recent_files_length": 16,
                                 "session_path": default_session_path}}  # fmt: skip
