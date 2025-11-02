@@ -60,6 +60,10 @@ class MenuBar(QtWidgets.QMenuBar):
         self.layout_menu.setTitle("Layout")
         self.layout_menu.addActions(actions.layout.actions())
 
+        self.theme_menu = QtWidgets.QMenu(self)
+        self.theme_menu.setTitle("Theme")
+        self.theme_menu.addActions(actions.themes.actions())
+
         self.editor_zoom_menu = QtWidgets.QMenu(self)
         self.editor_zoom_menu.setTitle("Editor Zoom")
         self.editor_zoom_menu.addAction(actions.font_size_up)
@@ -67,6 +71,7 @@ class MenuBar(QtWidgets.QMenuBar):
         self.editor_zoom_menu.addAction(actions.font_size_reset)
 
         self.menuView.addMenu(self.layout_menu)
+        self.menuView.addMenu(self.theme_menu)
         self.menuView.addSeparator()
         self.menuView.addAction(actions.show_fs_explorer)
         self.menuView.addAction(actions.show_compiler_options)

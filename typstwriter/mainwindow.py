@@ -162,6 +162,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Use default layout
         self.use_default_layout()
 
+        # Use default theme
+        self.use_default_theme()
+
         # Load last session
         if config.get("General", "resume_last_session", "bool"):
             self.load_session()
@@ -223,6 +226,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.show_compiler_output.setChecked(config.get("Layout", "show_compiler_output", typ="bool"))
 
         self.splitter.setSizes([1e6, 1e6])
+
+    def use_default_theme(self):
+        """Apply theme set in the config."""
+        default_theme = config.get("General", "theme")
+        for theme in self.actions.themes.actions():
+            if theme.data() == default_theme:
+                theme.trigger()
 
     def set_fs_explorer_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""

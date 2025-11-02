@@ -2,6 +2,8 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
+import qt_themes
+
 from typstwriter import util
 
 from typstwriter import logging
@@ -116,6 +118,23 @@ class Actions(QtCore.QObject):
         self.layout.addAction(self.layout_typewriter)
         self.layout.addAction(self.layout_editorL)
         self.layout.addAction(self.layout_editorR)
+
+        self.themes = QtWidgets.QActionGroup(self)
+        theme = QtWidgets.QAction(self)
+        theme.setData(None)
+        theme.setText("System Default")
+        theme.setCheckable(True)
+        theme.setChecked(True)
+        theme.triggered.connect(lambda: qt_themes.set_theme(None))
+        self.themes.addAction(theme)
+
+        for t in sorted(qt_themes.get_themes().keys()):
+            theme = QtWidgets.QAction(self)
+            theme.setData(t)
+            theme.setText(t.replace("_", " ").title())
+            theme.setCheckable(True)
+            theme.triggered.connect(lambda s, t=t: qt_themes.set_theme(t))
+            self.themes.addAction(theme)
 
         self.show_fs_explorer = QtWidgets.QAction(self)
         self.show_fs_explorer.setText("Show FS Explorer")
