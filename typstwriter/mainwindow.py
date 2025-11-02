@@ -2,8 +2,6 @@ from qtpy import QtGui
 from qtpy import QtCore
 from qtpy import QtWidgets
 
-import qt_themes
-
 from typstwriter import menubar
 from typstwriter import toolbar
 from typstwriter import actions
@@ -184,13 +182,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         logger.info("Gui ready")
 
-    def set_theme(self, theme):
-        """Set Theme to selected."""
-        if theme not in list(qt_themes.get_themes().keys()):
-            theme = None
-
-        qt_themes.set_theme(theme)
-
     def set_layout_typewriter(self):
         """Set Typstwriter Layout: PDF on top, Editor on bottom."""
         # Vertical orientation
@@ -238,13 +229,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def use_default_theme(self):
         """Apply theme set in the config."""
-        default_theme = config.get("General", "default_theme")
-        if default_theme not in list(qt_themes.get_themes().keys()):
-            default_theme = None
-
-        # Set this way to make sure it is also selcted in the menu bar
-        for theme in list(self.actions.themes.actions()):
-            print(theme.data(), default_theme)
+        default_theme = config.get("General", "theme")
+        for theme in self.actions.themes.actions():
             if theme.data() == default_theme:
                 theme.trigger()
 

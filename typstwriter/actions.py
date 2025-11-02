@@ -120,11 +120,11 @@ class Actions(QtCore.QObject):
         self.layout.addAction(self.layout_editorR)
 
         self.themes = QtWidgets.QActionGroup(self)
-
         theme = QtWidgets.QAction(self)
         theme.setData(None)
         theme.setText("System Default")
         theme.setCheckable(True)
+        theme.setChecked(True)
         theme.triggered.connect(lambda: qt_themes.set_theme(None))
         self.themes.addAction(theme)
 

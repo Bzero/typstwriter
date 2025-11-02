@@ -20,7 +20,7 @@ config_paths = ["/etc/typstwriter/typstwriter.ini",
 
 default_config = {"General": {"working_directory": "~/",
                               "resume_last_session": False,
-                              "default_theme": "default"},
+                              "theme": "default"},
                   "Compiler": {"name": "typst",
                                "mode": "on_demand"},
                   "Editor": {"font_size": 10,
