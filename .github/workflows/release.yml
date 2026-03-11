@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  #   push:
+  #     tags:
+  #       - "v*"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run tests
+    uses: Bzero/typstwriter/.github/workflows/ci.yml@master
+
+  build-macos-dmg:
+    needs: test
+    runs-on: macos-latest
+    # softprops/action-gh-release has not yet shipped a node24-compatible release.
+    # Remove this once https://github.com/softprops/action-gh-release/issues/654 is resolved.
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install pyinstaller
+
+      - name: Build macOS app with PyInstaller
+        run: |
+          pyinstaller typstwriter.spec
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          create-dmg \
+            --volname "Typstwriter" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "typstwriter.app" 150 185 \
+            --app-drop-link 450 185 \
+            "typstwriter.dmg" \
+            "dist/typstwriter.app"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            typstwriter.dmg
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
