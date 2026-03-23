@@ -712,7 +712,7 @@ class EditorStatusBar(QtWidgets.QWidget):
         self.syntax_combo_box = QtWidgets.QComboBox()
         for name in sorted(syntax_highlighting.available_lexers(), key=str.lower):
             self.syntax_combo_box.addItem(name)
-        self.syntax_combo_box.textActivated.connect(lambda text: self.syntax_changed.emit(text))
+        self.syntax_combo_box.textActivated.connect(self.syntax_changed.emit)
 
         self.Layout.addStretch()
         self.Layout.addWidget(self.syntax_combo_box)
