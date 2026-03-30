@@ -1,4 +1,4 @@
-from qtpy import QtCore, QtWidgets
+from qtpy import QtWidgets
 
 import qt_themes
 
@@ -7,6 +7,7 @@ from typstwriter import logging
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
+
 
 class SettingsDialog(QtWidgets.QDialog):
     """Settings Dialog."""
@@ -28,14 +29,13 @@ class SettingsDialog(QtWidgets.QDialog):
         self.init_layout_tab()
         self.init_internals_tab()
 
-        self.button_box = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel
-        )
+        self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel)
         self.button_box.accepted.connect(self.save_settings)
         self.button_box.rejected.connect(self.reject)
         self.main_layout.addWidget(self.button_box)
 
     def init_general_tab(self):
+        """Initialize the General tab."""
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QFormLayout(tab)
 
@@ -47,13 +47,12 @@ class SettingsDialog(QtWidgets.QDialog):
         layout.addRow("Resume Last Session:", self.general_resume_session)
 
         self.general_theme = QtWidgets.QComboBox()
-        theme_names = ["System Default"] + sorted(qt_themes.get_themes().keys())
+        theme_names = ["System Default", *sorted(qt_themes.get_themes().keys())]
         for t in theme_names:
             if t == "System Default":
                 self.general_theme.addItem(t, None)
             else:
                 self.general_theme.addItem(t.title().replace("_", " "), t)
-                
         current_theme = config.get("General", "theme")
         index = self.general_theme.findData(current_theme)
         self.general_theme.setCurrentIndex(index if index >= 0 else 0)
@@ -68,13 +67,15 @@ class SettingsDialog(QtWidgets.QDialog):
             "- $XDG_CONFIG_HOME/typstwriter/typstwriter.ini (Linux/Unix Only) <br>"
             "- %USERPROFILE%\\AppData\\Local\\typstwriter\\typstwriter.ini (Windows Only) <br>"
             "- ~/.typstwriter.ini <br>"
-            "- ./typstwriter.ini (Working Directory) <br><br>"
-            "You can either edit the settings here in this GUI, or manually through the configuration file in the aforementioned locations."
+            "- ./typstwriter.ini (Working Directory) <br>"
+            "You can either edit the settings here in this GUI, or manually through the configuration file \
+             in the aforementioned locations."
         )
         layout.addRow(hint_label)
         self.tabs.addTab(tab, "General")
 
     def init_compiler_tab(self):
+        """Initialize the Compiler tab."""
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QFormLayout(tab)
 
@@ -84,17 +85,16 @@ class SettingsDialog(QtWidgets.QDialog):
         self.compiler_mode = QtWidgets.QComboBox()
         self.compiler_mode.addItem("Live", "live")
         self.compiler_mode.addItem("On Demand", "on_demand")
-        
         current_mode = config.get("Compiler", "mode")
         index = self.compiler_mode.findData(current_mode)
         if index >= 0:
             self.compiler_mode.setCurrentIndex(index)
-            
         layout.addRow("Mode:", self.compiler_mode)
 
         self.tabs.addTab(tab, "Compiler")
 
     def init_editor_tab(self):
+        """Initialize the Editor tab."""
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QFormLayout(tab)
 
@@ -111,7 +111,10 @@ class SettingsDialog(QtWidgets.QDialog):
         layout.addRow("Highlighter Style:", self.editor_highlighter_style)
 
         hint_label = QtWidgets.QLabel()
-        hint_label.setText("<i>See <a href='https://pygments.org/styles/'>https://pygments.org/styles/</a> for available options</i>")
+        hint_label.setText(
+            "<i>See <a href='https://pygments.org/styles/'>https://pygments.org/styles/</a>\
+             for available options</i>"
+        )
         hint_label.setOpenExternalLinks(True)
         layout.addRow("", hint_label)
 
@@ -134,6 +137,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tabs.addTab(tab, "Editor")
 
     def init_layout_tab(self):
+        """Initialize the Layout tab."""
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QFormLayout(tab)
 
@@ -141,12 +145,11 @@ class SettingsDialog(QtWidgets.QDialog):
         self.layout_default_layout.addItem("Typewriter (Editor under Preview)", "typewriter")
         self.layout_default_layout.addItem("Editor Right of Preview", "editor_right")
         self.layout_default_layout.addItem("Editor Left of Preview", "editor_left")
-        
         current_layout = config.get("Layout", "default_layout")
         index = self.layout_default_layout.findData(current_layout)
         if index >= 0:
             self.layout_default_layout.setCurrentIndex(index)
-            
+
         layout.addRow("Default Layout:", self.layout_default_layout)
 
         self.layout_show_fs_explorer = QtWidgets.QCheckBox()
@@ -164,6 +167,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tabs.addTab(tab, "Layout")
 
     def init_internals_tab(self):
+        """Initialize the Internals tab."""
         tab = QtWidgets.QWidget()
         layout = QtWidgets.QFormLayout(tab)
 
@@ -181,6 +185,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tabs.addTab(tab, "Internals")
 
     def save_settings(self):
+        """Write the settings to the configuration file."""
         config.set("General", "working_directory", self.general_working_directory.text())
         config.set("General", "resume_last_session", self.general_resume_session.isChecked())
         config.set("General", "theme", self.general_theme.currentData())
