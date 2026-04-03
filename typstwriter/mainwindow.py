@@ -18,6 +18,8 @@ from typstwriter import globalstate
 from typstwriter import arguments
 from typstwriter import settings_gui
 
+from typstwriter import __version__
+
 logger = logging.getLogger(__name__)
 config = configuration.Config
 state = globalstate.State
@@ -151,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerConnector.compilation_finished.connect(self.editor.clear_errors)
         self.CompilerConnector.error_report.connect(self.editor.apply_errors)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.stop())
-        state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))  # noqa: PLW0108
+        state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
         # For now only display errors
@@ -256,9 +258,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_about(self):
         """Open about dialog."""
-        from typstwriter import __version__
-        QtWidgets.QMessageBox.about(self, "About Typstwriter", 
-            f"Typstwriter {__version__}\nAn integrated editor for the typst typesetting system\nhttps://github.com/Bzero/typstwriter\nLicensed under MIT ")
+        QtWidgets.QMessageBox.about(
+            self,
+            "About Typstwriter",
+            f"Typstwriter {__version__}\nAn integrated editor for the typst typesetting system\
+            \nhttps://github.com/Bzero/typstwriter\nLicensed under MIT ",
+        )
 
     def open_config(self):
         """Open config file."""
