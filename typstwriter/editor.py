@@ -71,7 +71,7 @@ class Editor(QtWidgets.QFrame):
         icon = QtGui.QIcon.fromTheme(QtGui.QIcon.DocumentNew, QtGui.QIcon(util.icon_path("newFile.svg")))
         self.TabWidget.addTab(editorpage, icon, name)
         self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("green"))
+        self.update_tab_color(self.TabWidget.count() - 1)
 
         editorpage.edit.textChanged.connect(self.childtext_changed)
         editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -85,7 +85,7 @@ class Editor(QtWidgets.QFrame):
             icon = util.FileIconProvider().icon(QtCore.QFileInfo(path))
             self.TabWidget.addTab(editorpage, icon, name)
             self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
-            self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("black"))
+            self.update_tab_color(self.TabWidget.count() - 1)
 
             editorpage.edit.textChanged.connect(self.childtext_changed)
             editorpage.savestatechanged.connect(self.childsavedstate_changed)
@@ -138,7 +138,7 @@ class Editor(QtWidgets.QFrame):
         icon = QtGui.QIcon()
         self.TabWidget.addTab(welcomepage, icon, "Welcome")
         self.TabWidget.setCurrentIndex(self.TabWidget.count() - 1)
-        self.TabWidget.tabBar().setTabTextColor(self.TabWidget.count() - 1, QtGui.QColor("blue"))
+        self.update_tab_color(self.TabWidget.count() - 1)
         welcomepage.button_NewFile.pressed.connect(self.new_file)
         welcomepage.button_OpenFile.pressed.connect(self.open_file_dialog)
         welcomepage.open_file.connect(self.open_file)
@@ -160,6 +160,40 @@ class Editor(QtWidgets.QFrame):
                 return False
         self.recentFiles.write()
         return True
+
+    def update_tab_color(self, i):
+        """Update the text color of the tab with index i."""
+        textcolor = self.palette().buttonText().color()
+        coloredtextbase = self.palette().link().color()
+        if self.TabWidget.widget(i).tab_status() == enums.tab_status.standard:
+            self.TabWidget.tabBar().setTabTextColor(i, textcolor)
+        elif self.TabWidget.widget(i).tab_status() == enums.tab_status.new:
+            # boost contrast on light themes
+            value = (
+                coloredtextbase.value()
+                if self.palette().button().color().value() < textcolor.value()
+                else max(100, coloredtextbase.value() - 80)
+            )
+            self.TabWidget.tabBar().setTabTextColor(
+                i, QtGui.QColor.fromHsv(120, coloredtextbase.saturation(), value, coloredtextbase.alpha())
+            )  # green
+        elif self.TabWidget.widget(i).tab_status() == enums.tab_status.welcome:
+            self.TabWidget.tabBar().setTabTextColor(
+                i, QtGui.QColor.fromHsv(240, coloredtextbase.saturation(), coloredtextbase.value(), coloredtextbase.alpha())
+            )  # blue
+        elif self.TabWidget.widget(i).tab_status() == enums.tab_status.not_saved:
+            self.TabWidget.tabBar().setTabTextColor(
+                i, QtGui.QColor.fromHsv(0, coloredtextbase.saturation(), coloredtextbase.value(), coloredtextbase.alpha())
+            )  # red
+
+    def changeEvent(self, event):  # noqa: N802
+        """Acts on PaletteChange events, otherwise passes on to parent implementation."""
+        if event.type() == QtCore.QEvent.PaletteChange:
+            for i in range(self.TabWidget.count()):
+                self.update_tab_color(i)
+            event.accept()
+        else:
+            super().changeEvent(event)
 
     @QtCore.Slot()
     def save_all(self):
@@ -207,10 +241,7 @@ class Editor(QtWidgets.QFrame):
     def childsavedstate_changed(self, savestate):
         """Trigger textChanged."""
         i = self.TabWidget.indexOf(self.sender())
-        if savestate:
-            self.TabWidget.tabBar().setTabTextColor(i, QtGui.QColor("black"))
-        else:
-            self.TabWidget.tabBar().setTabTextColor(i, QtGui.QColor("red"))
+        self.update_tab_color(i)
 
     @QtCore.Slot(str)
     def childpath_changed(self, path):
@@ -487,6 +518,14 @@ class EditorPage(QtWidgets.QFrame):
         """Set status to unsaved."""
         self.issaved = False
         self.savestatechanged.emit(self.issaved)
+
+    def tab_status(self):
+        """Return the status indicated by tab name color."""
+        if not self.path:
+            return enums.tab_status.new
+        if not self.issaved:
+            return enums.tab_status.not_saved
+        return enums.tab_status.standard
 
     @QtCore.Slot(str)
     def show_file_changed_warning(self, path):
@@ -777,6 +816,10 @@ class WelcomePage(QtWidgets.QFrame):
     def tryclose(self):
         """Close page."""
         return True
+
+    def tab_status(self):
+        """Return status indicated by tab name color."""
+        return enums.tab_status.welcome
 
 
 class CodeEdit(QtWidgets.QPlainTextEdit):
