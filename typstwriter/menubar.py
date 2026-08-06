@@ -79,7 +79,10 @@ class MenuBar(QtWidgets.QMenuBar):
         self.menuView.addSeparator()
         self.menuView.addMenu(self.editor_zoom_menu)
 
+        self.menuSettings.addAction(actions.open_settings)
         self.menuSettings.addAction(actions.open_config)
+        self.menuSettings.addSeparator()
+        self.menuSettings.addAction(actions.about)
 
 
 class RecentFilesMenu(QtWidgets.QMenu):

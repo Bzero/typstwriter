@@ -148,9 +148,17 @@ class Actions(QtCore.QObject):
         self.show_compiler_output.setText("Show Compiler Output")
         self.show_compiler_output.setCheckable(True)
 
+        self.open_settings = QtWidgets.QAction(self)
+        self.open_settings.setIcon(QtGui.QIcon.fromTheme("preferences-system"))
+        self.open_settings.setText("Settings")
+
         self.open_config = QtWidgets.QAction(self)
         self.open_config.setIcon(QtGui.QIcon.fromTheme("configure-symbolic"))
         self.open_config.setText("Open config file")
+
+        self.about = QtWidgets.QAction(self)
+        self.about.setIcon(QtGui.QIcon.fromTheme("help-about"))
+        self.about.setText("About")
 
         self.run = util.TogglingAction(self)
         self.run.setIcon(

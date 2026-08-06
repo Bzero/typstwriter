@@ -65,7 +65,8 @@ pip install -e ./typstwriter/
 Run the tests with pytest to make sure that everything is working correctly. Inside the source directory, run:
 
 ```
-pytest
+pip install -e .[tests]
+QT_API=pyside6 pytest
 ```
 
 Activate pre-commit hooks to automatically check changes before committing. Inside the source directory, run:

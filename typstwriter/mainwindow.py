@@ -16,6 +16,9 @@ from typstwriter import logging
 from typstwriter import configuration
 from typstwriter import globalstate
 from typstwriter import arguments
+from typstwriter import settings_gui
+
+from typstwriter import __version__
 
 logger = logging.getLogger(__name__)
 config = configuration.Config
@@ -46,13 +49,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addToolBar(self.toolbar)
 
         # Host Widget for Editor and PDF Viewer
-        self.WidtetCore = QtWidgets.QWidget(self)
-        self.CoreLayout_v = QtWidgets.QVBoxLayout(self.WidtetCore)
+        self.WidgetCore = QtWidgets.QWidget(self)
+        self.CoreLayout_v = QtWidgets.QVBoxLayout(self.WidgetCore)
         self.CoreLayout_v.setContentsMargins(4, 4, 4, 4)
         self.CoreLayout_v.setSpacing(0)
-        self.setCentralWidget(self.WidtetCore)
+        self.setCentralWidget(self.WidgetCore)
 
-        self.splitter = QtWidgets.QSplitter(self.WidtetCore)
+        self.splitter = QtWidgets.QSplitter(self.WidgetCore)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.CoreLayout_v.addWidget(self.splitter)
 
@@ -139,7 +142,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actions.run.deactivated.connect(self.CompilerConnector.stop)
         self.CompilerConnector.started.connect(lambda: self.actions.run.setChecked(True))
         self.CompilerConnector.stopped.connect(lambda: self.actions.run.setChecked(False))
+        self.actions.open_settings.triggered.connect(self.open_settings)
         self.actions.open_config.triggered.connect(self.open_config)
+        self.actions.about.triggered.connect(self.open_about)
 
         self.FSExplorer.open_file.connect(self.editor.open_file)
         state.working_directory.Signal.connect(self.FSExplorer.root_changed)
@@ -148,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.CompilerConnector.compilation_finished.connect(self.editor.clear_errors)
         self.CompilerConnector.error_report.connect(self.editor.apply_errors)
         state.main_file.Signal.connect(lambda s: self.CompilerConnector.stop())
-        state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))  # noqa: PLW0108
+        state.main_file.Signal.connect(lambda s: self.CompilerOptions.main_changed(s))
         state.main_file.Signal.connect(lambda s: self.PDFWidget.open(util.pdf_path(s)))
 
         # For now only display errors
@@ -245,6 +250,20 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_compiler_output_visibility(self, visibility):
         """Set the visibility of the fs explplorer."""
         self.CompilerOutputdock.setVisible(visibility)
+
+    def open_settings(self):
+        """Open settings dialog."""
+        dialog = settings_gui.SettingsDialog(self)
+        dialog.exec()
+
+    def open_about(self):
+        """Open about dialog."""
+        QtWidgets.QMessageBox.about(
+            self,
+            "About Typstwriter",
+            f"Typstwriter {__version__}\nAn integrated editor for the typst typesetting system\
+            \nhttps://github.com/Bzero/typstwriter\nLicensed under MIT ",
+        )
 
     def open_config(self):
         """Open config file."""
